@@ -1,10 +1,10 @@
 class Elev:
     def __init__(self, namn, ålder, godkänd):
         self.namn = namn
-        self. ålder = ålder
-        self. godkänd = godkänd
+        self.ålder = ålder
+        self.godkänd = godkänd
     
-    def __str__(self):
+    def presentera(self):
         if self.godkänd == True:
             return(f"Hej jag heter {self.namn} och är {self.ålder} och just nu är jag glad för jag fick godkänt")
         else:
@@ -12,4 +12,4 @@ class Elev:
 
 Axel = Elev("Axel Brandel", "18", True)
 
-print(Axel)
+print(Elev.presentera(Axel))
