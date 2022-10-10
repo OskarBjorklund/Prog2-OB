@@ -24,6 +24,7 @@ class Haj(Fisk):
         self.antalTänder = antalTänder
 
 torsk1 = Torsk("per", 45, 20)
+
 haj1 = Haj("Pelle", 100, 100)
 
 print(Fisk.fånga(haj1, torsk1))
