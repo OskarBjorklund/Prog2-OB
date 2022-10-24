@@ -1,6 +1,6 @@
 def liarcheck(guesses):
 
-    numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     for i in range(0, len(guesses), 2):
         if guesses[i+1] == "too high":
             for j in range(int(guesses[i])-1, len(numbers)-1):
