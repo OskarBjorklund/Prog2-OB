@@ -1,4 +1,4 @@
-MORSE_CODE_DICT = { 'A':'.-', 'B':'-...',
+morsecode = 		{ 'A':'.-', 'B':'-...',
 					'C':'-.-.', 'D':'-..', 'E':'.',
 					'F':'..-.', 'G':'--.', 'H':'....',
 					'I':'..', 'J':'.---', 'K':'-.-',
@@ -10,23 +10,29 @@ MORSE_CODE_DICT = { 'A':'.-', 'B':'-...',
 					'1':'.----', '2':'..---', '3':'...--',
 					'4':'....-', '5':'.....', '6':'-....',
 					'7':'--...', '8':'---..', '9':'----.',
-					'0':'-----', ', ':'--..--', '.':'.-.-.-',
-					'?':'..--..', '/':'-..-.', '-':'-....-',
-					'(':'-.--.', ')':'-.--.-'}
+					'0':'-----', ', ':'', '.':'', '?':'', ' ':'', 
+					'/':'', '':'', '(':'', ')':'', "'":''}
 
 def encrypt(message):
 	cipher = ''
 	for letter in message:
-		if letter != ' ':
-			cipher += MORSE_CODE_DICT[letter] + ' '
-		else:
-			cipher += ' '
+		cipher += morsecode[letter]
 
 	return cipher
 
 def main():
-	message = "hej"
+	message = input()
 	result = encrypt(message.upper())
-	print (result)
+
+	palindrome = True
+	
+	for i in range (int(len(result)/2)+1):
+		if result[i] != result[-1-i]:
+			palindrome = False
+	
+	if palindrome == True:
+		print("1")
+	else:
+		print("0")
 
 main()
