@@ -1,3 +1,5 @@
+#Denna uppgift är inte klar.
+
 with open("uppgift2.txt", "r") as f:
     a = f.read().split()
 temp = list(a[0])
