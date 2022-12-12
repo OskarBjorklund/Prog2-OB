@@ -1,11 +1,11 @@
 from tkinter import *
 import random
 
-game_width = 500
-game_height = 500
+game_width = 700
+game_height = 700
 speed = 50
 space_size = 20
-body_parts = 3
+body_parts = 250
 snake_color = "#00FF00"
 food_color = "#FF0000"
 background_color = "#000000"
@@ -52,16 +52,68 @@ def next_turn(snake, food):
 
     square = canvas.create_rectangle(x, y, x + space_size, y + space_size, fill=snake_color)
 
-    window.after(speed, next_turn, snake, food)
+    snake.squares.insert(0, square)
+
+    if x == food.coordinates[0] and y == food.coordinates[1]:
+
+        global score
+
+        score += 1
+
+        label.config(text="Score:{}".format(score))
+
+        canvas.delete("food")
+
+        food = Food()
+
+    else:
+        del snake.coordinates[-1]
+
+        canvas.delete(snake.squares[-1])
+
+        del snake.squares[-1]
+
+    if check_collision(snake):
+        game_over()
+    else:
+        window.after(speed, next_turn, snake, food)
 
 def change_direction(new_direction):
-    pass
+    
+    global direction
 
-def check_collision():
-    pass
+    if new_direction == 'left':
+        if direction != 'right':
+             direction = new_direction
+    elif new_direction == 'right':
+        if direction != 'left':
+             direction = new_direction
+    elif new_direction == 'up':
+        if direction != 'down':
+             direction = new_direction
+    elif new_direction == 'down':
+        if direction != 'up':
+             direction = new_direction
+    
+
+def check_collision(snake):
+    
+    x, y = snake.coordinates[0]
+
+    if x < 0 or x >= game_width:
+        return True
+    elif y < 0 or y >= game_height:
+        return True
+    
+    for body_parts in snake.coordinates[1:]:
+        if x == body_parts[0] and y == body_parts[1]:
+            return True
+    
+    return False
 
 def game_over():
-    pass
+    canvas.delete(ALL)
+    canvas.create_text(canvas.winfo_width()/2, canvas.winfo_height()/2, font=('consolas', 70), text="Game over!", fill="red", tag="gameover")
 
 window = Tk()
 window.title("Snake")
@@ -88,7 +140,14 @@ y = int((screen_height/2) - (window_height/2))
 
 window.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
+window.bind('<Left>', lambda event: change_direction('left'))
+window.bind('<Right>', lambda event: change_direction('right'))
+window.bind('<Up>', lambda event: change_direction('up'))
+window.bind('<Down>', lambda event: change_direction('down'))
+
 snake = Snake()
 food = Food()
+
+next_turn(snake, food)
 
 window.mainloop()
