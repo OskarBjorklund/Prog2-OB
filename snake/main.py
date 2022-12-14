@@ -1,11 +1,11 @@
 from tkinter import *
 import random
 
-game_width = 700
-game_height = 700
+game_width = 500
+game_height = 500
 speed = 50
 space_size = 20
-body_parts = 250
+body_parts = 3
 snake_color = "#00FF00"
 food_color = "#FF0000"
 background_color = "#000000"
@@ -115,6 +115,8 @@ def game_over():
     canvas.delete(ALL)
     canvas.create_text(canvas.winfo_width()/2, canvas.winfo_height()/2, font=('consolas', 70), text="Game over!", fill="red", tag="gameover")
 
+
+
 window = Tk()
 window.title("Snake")
 window.resizable(False, False)
@@ -146,6 +148,8 @@ window.bind('<Up>', lambda event: change_direction('up'))
 window.bind('<Down>', lambda event: change_direction('down'))
 
 snake = Snake()
+food = Food()
+food = Food()
 food = Food()
 
 next_turn(snake, food)
