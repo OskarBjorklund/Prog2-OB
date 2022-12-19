@@ -149,8 +149,6 @@ window.bind('<Down>', lambda event: change_direction('down'))
 
 snake = Snake()
 food = Food()
-food = Food()
-food = Food()
 
 next_turn(snake, food)
 
