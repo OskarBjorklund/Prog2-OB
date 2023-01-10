@@ -1,8 +1,8 @@
 import tkinter as tk
 import random
 
-GAME_WIDTH = 800
-GAME_HEIGHT = 800
+GAME_WIDTH = 500
+GAME_HEIGHT = 500
 speed = 100
 space_size = 20
 body_parts = 3
@@ -103,7 +103,7 @@ def change_direction(snake, new_vel):
     
 def game_over(winner):
     canvas.delete(tk.ALL)
-    canvas.create_text(canvas.winfo_width()/2, canvas.winfo_height()/2, font=('consolas', 70), text="Game over!", fill="red", tag="gameover")
+    canvas.create_text(canvas.winfo_width()/2, canvas.winfo_height()/2, font=('consolas', 50), text="Game over!", fill="red", tag="gameover")
     start.grid(row=0, column=1)
     
     global snake1, snake2, food
@@ -141,7 +141,7 @@ screen_width = window.winfo_screenwidth()
 x = int((screen_width/2) - (window_width/2))
 y = int((screen_height/2) - (window_height/2))
 
-window.geometry(f"{window_width}x{window_height+70}+{x}+{y}")
+window.geometry(f"{window_width}x{window_height+y}+{x}+{y}")
 
 snake1 = Snake([0, 0], "blue")
 snake2 = Snake([GAME_WIDTH-space_size, 0], "green")
@@ -150,11 +150,11 @@ food = Food()
 snake1_string_var = tk.StringVar()
 snake2_string_var = tk.StringVar()
 
-snake1_score_label = tk.Label(window, textvariable=snake1_string_var, font=("consolas", 40))
+snake1_score_label = tk.Label(window, textvariable=snake1_string_var, font=("consolas", 20))
 snake1_score_label.grid(row=0, column=0)
-snake2_score_label = tk.Label(window, textvariable=snake2_string_var, font=("consolas", 40))
+snake2_score_label = tk.Label(window, textvariable=snake2_string_var, font=("consolas", 20))
 snake2_score_label.grid(row=0, column=2)
-start = tk.Button(text="Start", font=("consolas", 40), command=start_game)
+start = tk.Button(text="Start", font=("consolas", 20), command=start_game)
 start.grid(row=0, column=1)
 
 window.bind('<Left>', lambda event: change_direction(snake2, -1))
