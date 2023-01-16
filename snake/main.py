@@ -143,8 +143,8 @@ y = int((screen_height/2) - (window_height/2))
 
 window.geometry(f"{window_width}x{window_height+y}+{x}+{y}")
 
-snake1 = Snake([0, 0], "blue")
-snake2 = Snake([GAME_WIDTH-space_size, 0], "green")
+snake1 = Snake((0, 0), "blue")
+snake2 = Snake((GAME_WIDTH-space_size, 0), "green")
 food = Food()
 
 snake1_string_var = tk.StringVar()

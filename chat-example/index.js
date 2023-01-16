@@ -11,11 +11,20 @@ app.get("/", (req, res) => {
 });
 
 io.on("connection", (socket) => {
+    let username = "User";
+
     socket.on("chat message", (msg) => {
         console.log("message: " + msg)
     }),
     socket.on("chat message", (msg) => {
-        io.emit("chat message", msg);
+        if (msg[0] == "/"){
+            msg = msg.slice(1)
+            
+            io.emit("chat message", username + ": " + msg);
+        } else {
+            io.emit("chat message", username + ": " + msg);
+        }
+        
     });
     console.log("a lök connected");
     socket.on("disconnect", (socket) => {
