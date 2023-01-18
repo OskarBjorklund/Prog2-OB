@@ -12,22 +12,26 @@ app.get("/", (req, res) => {
 
 io.on("connection", (socket) => {
     let username = "User";
+    let preusername = "User"
 
     socket.on("chat message", (msg) => {
-        console.log("message: " + msg)
+        console.log("input: " + msg)
     }),
     socket.on("chat message", (msg) => {
         if (msg[0] == "/"){
             msg = msg.slice(1)
-            
-            io.emit("chat message", username + ": " + msg);
+            username = msg
+            io.emit("chat message", preusername + ' changed its name to "' + username + '"');
+            preusername = username
         } else {
             io.emit("chat message", username + ": " + msg);
         }
         
     });
+    socket.broadcast.emit("chat message", username + " connected");
     console.log("a lök connected");
     socket.on("disconnect", (socket) => {
+        io.emit("chat message", username + " disconnected");
         console.log("a lök disconnected");
     });
 });
