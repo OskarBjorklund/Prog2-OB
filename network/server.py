@@ -2,7 +2,7 @@ import socket as sock
 import pickle, threading
 
 HEADER_LENGTH = 10
-IP = "127.0.0.0"
+IP = "localhost"
 PORT = 8822
 
 class Server:
@@ -13,10 +13,8 @@ class Server:
 
         self.socket.bind((IP, PORT))
         self.socket.listen()
-        print(f"Server listening on {IP}:{PORT}")
+        print(f"Server listening on {IP}:{PORT}")   
 
-
-    
     def accept_clients(self):
         client, address = self.socket.accept()
         thread = threading.Thread(target=self.client_handler, args=(client, address))
@@ -28,12 +26,14 @@ class Server:
         
         connected = True
         while connected:
-            msg = client.recv(1024).decode("utf-8")
+            msg = client.recv(1024).decode("utf-16")
             if msg == "/disconnect":
                 connected = False
-            else:
-                print(f"{address}: {msg}")
-                msg = f"Message recieved: {msg}"
-                client.send(msg.encode("utf-8"))
+    
+            print(f"{address}: {msg}")
+            msg = f"Message recieved: {msg}"
+            client.send(msg.encode("utf-16"))
             
         client.close()
+
+server = Server()
