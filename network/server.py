@@ -6,6 +6,25 @@ IP = "localhost"
 PORT = 8822
 
 class Server:
+    def __init__(self) -> None:
+        print("Server is starting...")
+        self.socket = sock.socket(sock.AF_INET, sock.SOCK_STREAM)
+        self.socket.setsockopt(sock.SOL_SOCKET, sock.SO_REUSEADDR, 1)
+
+        self.socket.bind((IP, PORT))
+        self.socket.listen(10)
+        print(f"Server listening on {IP}:{PORT}")
+
+        self.clients = {}
+
+    def client_accepter(self):
+        client, address = self.socket.accept()
+        thread = threading.Thread(target=self.client_handler, args=(client, address))
+        thread.start()
+        print(f"Active connections: {threading.activeCount() - 1}")
+
+        self.clients[address[1]] = client
+
     def client_handler(self, client, address):
         print(f"New client connected: {address}")
         
@@ -16,23 +35,14 @@ class Server:
                 connected = False
     
             print(f"{address}: {msg}")
-            msg = f"Message recieved: {msg}"
-            client.send(msg.encode("utf-16"))
+            
+            for c in self.clients.values():
+                if c != client:
+                    c.send(msg.encode("utf-16"))
             
         client.close()
     
-    def __init__(self) -> None:
-        print("Server is starting...")
-        self.socket = sock.socket(sock.AF_INET, sock.SOCK_STREAM)
-        self.socket.setsockopt(sock.SOL_SOCKET, sock.SO_REUSEADDR, 1)
-
-        self.socket.bind((IP, PORT))
-        print(f"Server listening on {IP}:{PORT}")   
-
-        while True:
-            client, address = self.socket.accept()
-            thread = threading.Thread(target=self.client_handler, args=(client, address))
-            thread.start()
-            print(f"Active connections: {threading.activeCount() - 1}")
-
 server = Server()
+
+while True:
+    server.client_accepter()

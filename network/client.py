@@ -1,5 +1,5 @@
 import socket as sock
-import pickle
+import pickle, threading
 
 HEADER_LENGTH = 10
 IP = "localhost"
@@ -12,16 +12,23 @@ class Client:
         self.socket.connect((IP, PORT))
         print(f"Client connected to server at {IP}:{PORT}")
 
-        connected = True
-        while connected:
+        self.connected = True
+        
+        thread = threading.Thread(target=self.recieve_info)
+        thread.start()
+
+        while self.connected:
             msg = input("> ")
 
             self.socket.send(msg.encode("utf-16"))
 
             if msg == "/disconnect":
-                connected = False
-            else:
-                msg = self.socket.recv(1024).decode("utf-16")
-                print(f"{msg}")
+                self.connected = False
+    
+
+    def recieve_info(self):
+        while self.connected:
+            msg = self.socket.recv(1024).decode("utf-16")
+            print(f"{msg}")
 
 client = Client()
