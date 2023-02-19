@@ -2,6 +2,8 @@ import socket as sock
 import pickle, threading
 
 HEADER_LENGTH = 10
+FORMAT = "utf-16"
+BYTES = 1024
 IP = "localhost"
 PORT = 8822
 
@@ -19,28 +21,35 @@ class Server:
 
     def client_accepter(self):
         client, address = self.socket.accept()
+
+        address = address[0] + ":" + str(address[1])
+
+        self.clients[address] = client
+
+        for c in self.clients.values():
+            c.send(address.encode(FORMAT))
+
         thread = threading.Thread(target=self.client_handler, args=(client, address))
         thread.start()
-        print(f"Active connections: {threading.activeCount() - 1}")
 
-        self.clients[address[1]] = client
+        print(len(self.clients))
 
     def client_handler(self, client, address):
         print(f"New client connected: {address}")
         
-        connected = True
-        while connected:
-            msg = client.recv(1024).decode("utf-16")
-            if msg == "/disconnect":
-                connected = False
+        # connected = True
+        # while connected:
+        #     msg = client.recv(BYTES).decode(FORMAT)
+        #     if msg == "/disconnect":
+        #         connected = False
     
-            print(f"{address}: {msg}")
+        #     print(f"{address}: {msg}")
             
-            for c in self.clients.values():
-                if c != client:
-                    c.send(msg.encode("utf-16"))
+        #     for c in self.clients.values():
+        #         if c != client:
+        #             c.send(msg.encode(FORMAT))
             
-        client.close()
+        # client.close()
     
 server = Server()
 
