@@ -27,8 +27,9 @@ class Server:
         self.clients[address] = client
 
         for c in self.clients.values():
-            c.send(address.encode(FORMAT))
-
+            for a in self.clients.keys():
+                c.send(a.encode(FORMAT))
+    
         thread = threading.Thread(target=self.client_handler, args=(client, address))
         thread.start()
 

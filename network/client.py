@@ -19,8 +19,12 @@ class Client:
 
         self.connected = True
 
+        self.load_gui()
+
         recv_thread = threading.Thread(target=self.recieve_info)
         recv_thread.start()
+
+        self.start_gui()
 
         # while self.connected:
         #     msg = input("> ")
@@ -30,7 +34,7 @@ class Client:
         #     if msg == "/disconnect":
         #         self.connected = False
     
-    def gui(self):
+    def load_gui(self):
         self.root = tk.Tk()
 
         self.frame = tk.Frame(self.root)
@@ -72,8 +76,6 @@ class Client:
   
         self.scrollbar.config(command = self.listbox.yview)
 
-        self.root.mainloop()
-
     def rock(self):
         pass
 
@@ -93,5 +95,8 @@ class Client:
         while self.connected:
             listed_client = self.socket.recv(BYTES).decode(FORMAT)
             self.listbox.insert(tk.END, listed_client)
+
+    def start_gui(self):
+        self.root.mainloop()
 
 client = Client()
