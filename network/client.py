@@ -7,7 +7,7 @@ GAME_WIDTH = 500
 GAME_HEIGHT = 500
 HEADER_LENGTH = 10
 FORMAT = "utf-16"
-BYTES = 1024
+BUFFERSIZE = 1024
 IP = "localhost"
 PORT = 8822
 
@@ -16,6 +16,11 @@ class Client:
         self.socket = sock.socket(sock.AF_INET, sock.SOCK_STREAM)
         self.socket.connect((IP, PORT))
         print(f"Client connected to server at {IP}:{PORT}")
+
+        self.client, self.address = self.socket.getsockname()
+        self.client_name = str(self.client) + ":" + str(self.address)
+
+        print(self.client_name)
 
         self.connected = True
 
@@ -64,13 +69,16 @@ class Client:
         self.button5 = tk.Button(self.frame, text = "Scissors")
         self.button5.grid(row = 3, column = 4, padx = 5, pady = 5)
 
+        self.button6 = tk.Button(self.frame, text = "Disconnect", command=self.disconnect)
+        self.button6.grid(row = 3, column = 5, padx = 5, pady = 5)
+
         self.listbox = Listbox(self.frame)
   
-        self.listbox.grid(row = 1, rowspan = 3, column = 5, pady = 5)
+        self.listbox.grid(row = 1, rowspan = 2, column = 5, pady = 5)
   
         self.scrollbar = tk.Scrollbar(self.frame)
   
-        self.scrollbar.grid(row = 1, rowspan = 3, column = 6, sticky = "news")
+        self.scrollbar.grid(row = 1, rowspan = 2, column = 6, sticky = "news")
 
         self.listbox.config(yscrollcommand = self.scrollbar.set)
   
@@ -91,10 +99,24 @@ class Client:
     def scissors(self):
         pass
 
+    def disconnect(self):
+        self.socket.send("disconnect".encode(FORMAT))
+        self.connected = False
+        self.socket.shutdown(sock.SHUT_RDWR)
+        self.socket.close()
+        self.root.destroy()
+
     def recieve_info(self):
         while self.connected:
-            listed_client = self.socket.recv(BYTES).decode(FORMAT)
-            self.listbox.insert(tk.END, listed_client)
+            client_str = self.socket.recv(BUFFERSIZE).decode(FORMAT)
+            self.listbox.delete(0, tk.END)
+            
+            for c in client_str.split(","):
+                if c == self.client_name:
+                    you = c + " (You)"
+                    self.listbox.insert(tk.END, you)
+                else:
+                    self.listbox.insert(tk.END, c)
 
     def start_gui(self):
         self.root.mainloop()
