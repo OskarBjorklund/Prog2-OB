@@ -20,7 +20,6 @@ class Client:
         self.client, self.address = self.socket.getsockname()
         self.client_name = str(self.client) + ":" + str(self.address)
 
-        print(self.client_name)
 
         self.connected = True
 
@@ -69,17 +68,14 @@ class Client:
         self.button5 = tk.Button(self.frame, text = "Scissors")
         self.button5.grid(row = 3, column = 4, padx = 5, pady = 5)
 
-        self.button6 = tk.Button(self.frame, text = "Disconnect", command=self.disconnect)
-        self.button6.grid(row = 3, column = 5, padx = 5, pady = 5)
-
         #Listbox
-        self.listbox = Listbox(self.frame)
+        self.listbox = Listbox(self.frame, width = 30)
   
-        self.listbox.grid(row = 1, rowspan = 2, column = 5, pady = 5)
+        self.listbox.grid(row = 1, rowspan = 3, column = 5, pady = 5)
   
         self.scrollbar = tk.Scrollbar(self.frame)
   
-        self.scrollbar.grid(row = 1, rowspan = 2, column = 6, sticky = "news")
+        self.scrollbar.grid(row = 1, rowspan = 3, column = 6, sticky = "news")
 
         self.listbox.config(yscrollcommand = self.scrollbar.set)
   
@@ -120,15 +116,15 @@ class Client:
         while self.connected:
             client_str = self.socket.recv(BUFFERSIZE).decode(FORMAT)
             self.listbox.delete(0, tk.END)
-            
-            for c in client_str.split(","):
-                if c == self.client_name:
-                    you = c + " (You)"
-                    self.listbox.insert(tk.END, you)
-                else:
-                    self.listbox.insert(tk.END, c)
+            for s in client_str.split(" "):
+                address, wins = s.split(",")
+                list_item = f"Wins: {wins}, " + address
+                if address == self.client_name:
+                    list_item += " (You)"
+                self.listbox.insert(tk.END, list_item)
 
     def start_gui(self):
         self.root.mainloop()
+        self.disconnect()
 
 client = Client()
