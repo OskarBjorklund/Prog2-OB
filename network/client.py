@@ -72,6 +72,7 @@ class Client:
         self.button6 = tk.Button(self.frame, text = "Disconnect", command=self.disconnect)
         self.button6.grid(row = 3, column = 5, padx = 5, pady = 5)
 
+        #Listbox
         self.listbox = Listbox(self.frame)
   
         self.listbox.grid(row = 1, rowspan = 2, column = 5, pady = 5)
@@ -85,18 +86,27 @@ class Client:
         self.scrollbar.config(command = self.listbox.yview)
 
     def rock(self):
-        pass
+        self.socket.send("rock".encode(FORMAT))
 
     def paper(self):
-        pass
+        self.socket.send("paper".encode(FORMAT))
 
     def spock(self):
-        pass
+        self.socket.send("spock".encode(FORMAT))
 
     def lizard(self):
-        pass
+        self.socket.send("lizard".encode(FORMAT))
         
     def scissors(self):
+        self.socket.send("scissors".encode(FORMAT))
+
+    def loser(self):
+        pass
+
+    def winner(self):
+        pass
+
+    def start_game(self):
         pass
 
     def disconnect(self):

@@ -20,13 +20,21 @@ class Server:
         self.clients = {}
 
     def client_accepter(self):
-        client_list = []
-
         client, address = self.socket.accept()
 
         address = address[0] + ":" + str(address[1])
 
         self.clients[address] = client
+
+        self.client_list_update()
+    
+        recv_thread = threading.Thread(target=self.client_handler, args=(client, address))
+        recv_thread.start()
+
+        print(len(self.clients))
+
+    def client_list_update(self):
+        client_list = []
 
         for a in self.clients.keys():
             client_list.append(a)
@@ -34,11 +42,6 @@ class Server:
 
         for c in self.clients.values():
             c.send(client_str.encode(FORMAT))
-    
-        thread = threading.Thread(target=self.client_handler, args=(client, address))
-        thread.start()
-
-        print(len(self.clients))
 
     def client_handler(self, client, address):
         print(f"New client connected: {address}")
@@ -47,11 +50,19 @@ class Server:
         while connected:
             msg = client.recv(BUFFERSIZE).decode(FORMAT)
             if msg == "disconnect":
+                print(f"Client disconnected: {address}")
                 del self.clients[address]        
                 connected = False 
-                #TAR INTE BORT ALLT IFRÅN SOCKET CLIENT
+                client.close()
+                self.client_list_update()
+                print(len(self.clients))
+
+    def start_game(self):
+        if len(self.clients) >= 2:
+            print("Working!")
     
 server = Server()
 
 while True:
     server.client_accepter()
+    server.start_game()
