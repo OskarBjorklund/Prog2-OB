@@ -53,20 +53,17 @@ class Client:
         self.winner.grid(row = 2, column = 0, columnspan = 5, padx = 5, pady = 5)
 
         #Choice
-        self.button1 = tk.Button(self.frame, text = "Rock")
-        self.button1.grid(row = 3, column = 0, padx = 5, pady = 5)
+        self.button1 = tk.Button(self.frame, text = "Rock", command = self.rock)
         
-        self.button2 = tk.Button(self.frame, text = "Paper")
-        self.button2.grid(row = 3, column = 1, padx = 5, pady = 5)
+        self.button2 = tk.Button(self.frame, text = "Paper", command = self.paper)
 
-        self.button3 = tk.Button(self.frame, text = "Spock")
-        self.button3.grid(row = 3, column = 2, padx = 5, pady = 5)
+        self.button3 = tk.Button(self.frame, text = "Spock", command = self.spock)
 
-        self.button4 = tk.Button(self.frame, text = "Lizard")
-        self.button4.grid(row = 3, column = 3, padx = 5, pady = 5)
+        self.button4 = tk.Button(self.frame, text = "Lizard", command = self.lizard)
 
-        self.button5 = tk.Button(self.frame, text = "Scissors")
-        self.button5.grid(row = 3, column = 4, padx = 5, pady = 5)
+        self.button5 = tk.Button(self.frame, text = "Scissors", command = self.scissors)
+
+        self.button = [self.button1, self.button2, self.button3, self.button4, self.button5]
 
         #Listbox
         self.listbox = Listbox(self.frame, width = 30)
@@ -84,17 +81,32 @@ class Client:
     def rock(self):
         self.socket.send("rock".encode(FORMAT))
 
+        for b in self.button:
+            b.grid_forget()
+
     def paper(self):
         self.socket.send("paper".encode(FORMAT))
+
+        for b in self.button:
+            b.grid_forget()
 
     def spock(self):
         self.socket.send("spock".encode(FORMAT))
 
+        for b in self.button:
+            b.grid_forget()
+
     def lizard(self):
         self.socket.send("lizard".encode(FORMAT))
+
+        for b in self.button:
+            b.grid_forget()
         
     def scissors(self):
         self.socket.send("scissors".encode(FORMAT))
+
+        for b in self.button:
+            b.grid_forget()
 
     def loser(self):
         pass
@@ -102,8 +114,12 @@ class Client:
     def winner(self):
         pass
 
-    def start_game(self):
-        pass
+    def playing(self):
+        self.button1.grid(row = 3, column = 0, padx = 5, pady = 5)
+        self.button2.grid(row = 3, column = 1, padx = 5, pady = 5)
+        self.button3.grid(row = 3, column = 2, padx = 5, pady = 5)
+        self.button4.grid(row = 3, column = 3, padx = 5, pady = 5)
+        self.button5.grid(row = 3, column = 4, padx = 5, pady = 5)
 
     def disconnect(self):
         self.socket.send("disconnect".encode(FORMAT))
@@ -114,9 +130,17 @@ class Client:
 
     def recieve_info(self):
         while self.connected:
-            client_str = self.socket.recv(BUFFERSIZE).decode(FORMAT)
+            recv_msg = self.socket.recv(BUFFERSIZE).decode(FORMAT)
             self.listbox.delete(0, tk.END)
-            for s in client_str.split(" "):
+
+            #FIXA VARIABEL
+            if len(recv_msg.split(" ")) >= 2:
+                for s in recv_msg.split(" ")[ :2]:
+                    address, wins = s.split(",")
+                    if address == self.client_name:
+                        self.playing()
+
+            for s in recv_msg.split(" "):
                 address, wins = s.split(",")
                 list_item = f"Wins: {wins}, " + address
                 if address == self.client_name:
