@@ -35,6 +35,8 @@ class Server:
         for client in self.clients.values():
             client[0].send(client_str.encode(FORMAT))
 
+        print(len(self.clients))
+
     def client_handler(self, client, address):
         print(f"New client connected: {address}")
         
@@ -52,7 +54,6 @@ class Server:
                 connected = False 
                 client.close()
                 self.broadcast_client_list()
-                print(len(self.clients))
             
 
     
