@@ -59,7 +59,9 @@ class Client:
         self.bt.grid(row = 4, column = 0, columnspan = 2)
     
     def send_info(self):
-        pass
+        list_str = (self.e1.get(), self.e2.get(), self.e3.get(), self.e4.get())
+        self.socket.send((",".join(list_str)).encode("utf-16"))
+
         
     def recieve_info(self):
         while self.connected:
