@@ -3,7 +3,7 @@ from tkinter import messagebox
 
 font = ("Arial", 10)	
 
-class MyGui:
+class StartGui:
 
     def __init__(self):
         self.root = tk.Tk()
@@ -122,5 +122,4 @@ class MyGui:
         if messagebox.askyesno(title="Windows message", message="Are you sure you want to quit?"):
             self.root.destroy()
 
-
-MyGui()
+StartGui()
