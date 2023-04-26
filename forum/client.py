@@ -1,12 +1,13 @@
 import socket as sock
 import tkinter as tk
-import pickle, threading
+import pickle, threading, bcrypt
 from tkinter import messagebox
 
 FONT = ("Arial", 10)	
 HEADER_LENGTH = 10
 IP = "localhost"
 PORT = 8822
+
 
 class StartGui:
 
@@ -108,13 +109,12 @@ class StartGui:
             print(list_str)
             self.client.send_info(list_str)
     
-
     def register(self):
         if self.e2.get() != self.e3.get():
             self.l5 = tk.Label(self.reg_frame, text = "Passwords don't match.", font = FONT,  fg = "red")
             self.l5.grid(row = 3, column = 0, sticky = "W", pady = 2, columnspan = 2)
         else:
-            list_str = (self.e1.get(), self.e2.get())
+            list_str = (self.e1.get(), self.encrypt((self.e2.get())))
             print(list_str)
             self.client.send_info(list_str)
 
@@ -132,6 +132,16 @@ class StartGui:
         else:
             self.reg_frame.pack_forget()
             self.login_gui()
+
+        
+    def encrypt(self, password):
+        bytes = password.encode("utf-8")
+
+        salt = bcrypt.gensalt()
+
+        hash = bcrypt.hashpw(bytes, salt)
+
+        return(hash.decode("utf-8"))
 
     def on_closing(self):
         if messagebox.askyesno(title="Windows message", message="Are you sure you want to quit?"):

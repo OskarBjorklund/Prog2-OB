@@ -34,20 +34,21 @@ class Server:
 
         self.clients[address[1]] = client
 
-# def sendto_database(self, info):
-#     mycursor = self.mydb.cursor()
-#     print("Uppkopplad till databasen!")
-#     sql = "INSERT INTO users (name, address, city, country) VALUES (%s, %s, %s, %s)"
-#     val = info.split(",")
-#     mycursor.execute(sql, val)
-#     self.mydb.commit()
-#     print(mycursor.rowcount, "record inserted.")
+    def sendto_database(self, info):
+        mycursor = self.mydb.cursor()
+        print("Uppkopplad till databasen!")
+        sql = "INSERT INTO user (username, password) VALUES (%s, %s)"
+        val = info.split(",")
+        mycursor.execute(sql, val)
+        self.mydb.commit()
+        print(mycursor.rowcount, "record inserted.")
 
-#     # Läsa från databasen
-#     mycursor.execute("SELECT * FROM user")
-#     myresult = mycursor.fetchall()
-#     for x in myresult:
-#         print(x)
+        # Läsa från databasen
+        mycursor.execute("SELECT * FROM user")
+        myresult = mycursor.fetchall()
+        for x in myresult:
+            users = list(x)
+        print(users)
 
     def client_handler(self, client, address):
         print(f"New client connected: {address}")
@@ -57,8 +58,7 @@ class Server:
             recv_msg = client.recv(1024).decode("utf-16")
             
             val = recv_msg.split(",")
-            print(val)
-            #self.sendto_database(recv_msg)
+            self.sendto_database(recv_msg)
             
         client.close()
     
