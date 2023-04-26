@@ -51,19 +51,17 @@ class Server:
         print(users)
 
     def login(self, credentials):
-        if credentials[0] == "1": #Existing user
-            info = credentials.pop(0)
+        if credentials.pop(0) == "1": #Existing user
             mycursor = self.mydb.cursor()
             print("Uppkopplad till databasen!")
-            sql = f"SELECT username AND password FROM user WHERE username = {credentials[1]} AND password = {credentials[2]}"
-            mycursor.execute(sql, info)
+            sql = f"SELECT username AND password FROM user WHERE username = %s AND password = %s"
+            mycursor.execute(sql, credentials)
             self.mydb.commit()
         else: #New user
-            info = credentials.pop(0)
             mycursor = self.mydb.cursor()
             print("Uppkopplad till databasen!")
             sql = "INSERT INTO user (username, password) VALUES (%s, %s)"
-            mycursor.execute(sql, info)
+            mycursor.execute(sql, credentials)
             self.mydb.commit()
             print(mycursor.rowcount, "record inserted.")
 
