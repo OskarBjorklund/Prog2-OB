@@ -105,7 +105,7 @@ class StartGui:
             self.l4 = tk.Label(self.log_frame, text = "Invalid login. Check you password.", font = FONT,  fg = "red")
             self.l4.grid(row = 3, column = 0, sticky = "W", pady = 2, columnspan = 2,)
         else:
-            list_str = (self.e1.get(), self.e2.get())
+            list_str = ("1", self.e1.get(), self.encrypt(self.e2.get())) #True = Existing user
             print(list_str)
             self.client.send_info(list_str)
     
@@ -114,7 +114,7 @@ class StartGui:
             self.l5 = tk.Label(self.reg_frame, text = "Passwords don't match.", font = FONT,  fg = "red")
             self.l5.grid(row = 3, column = 0, sticky = "W", pady = 2, columnspan = 2)
         else:
-            list_str = (self.e1.get(), self.encrypt((self.e2.get())))
+            list_str = ("0", self.e1.get(), self.encrypt(self.e2.get())) #False = New user
             print(list_str)
             self.client.send_info(list_str)
 

@@ -19,7 +19,7 @@ class Server:
 
         self.mydb = mysql.connector.connect(
             host=IP,
-            user="root",  # s"tandardanvändarnamn för XAMPP
+            user="root",  # standardanvändarnamn för XAMPP
             password="",  # dito lösenord (en tom sträng)
             database="forum"  # byt namn om din databas heter något annat
 )
@@ -38,8 +38,8 @@ class Server:
         mycursor = self.mydb.cursor()
         print("Uppkopplad till databasen!")
         sql = "INSERT INTO user (username, password) VALUES (%s, %s)"
-        val = info.split(",")
-        mycursor.execute(sql, val)
+        #val = info.split(",")
+        mycursor.execute(sql, info)
         self.mydb.commit()
         print(mycursor.rowcount, "record inserted.")
 
@@ -50,15 +50,36 @@ class Server:
             users = list(x)
         print(users)
 
+    def login(self, credentials):
+        if credentials[0] == "1": #Existing user
+            info = credentials.pop(0)
+            mycursor = self.mydb.cursor()
+            print("Uppkopplad till databasen!")
+            sql = f"SELECT username AND password FROM user WHERE username = {credentials[1]} AND password = {credentials[2]}"
+            mycursor.execute(sql, info)
+            self.mydb.commit()
+        else: #New user
+            info = credentials.pop(0)
+            mycursor = self.mydb.cursor()
+            print("Uppkopplad till databasen!")
+            sql = "INSERT INTO user (username, password) VALUES (%s, %s)"
+            mycursor.execute(sql, info)
+            self.mydb.commit()
+            print(mycursor.rowcount, "record inserted.")
+
+
     def client_handler(self, client, address):
         print(f"New client connected: {address}")
         
         connected = True
+
         while connected:
             recv_msg = client.recv(1024).decode("utf-16")
             
-            val = recv_msg.split(",")
-            self.sendto_database(recv_msg)
+            recv_msg = recv_msg.split(",")
+
+            if len(recv_msg) == 3:
+                self.login(recv_msg)
             
         client.close()
     
