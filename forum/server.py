@@ -54,16 +54,24 @@ class Server:
         if credentials.pop(0) == "1": #Existing user
             mycursor = self.mydb.cursor()
             print("Uppkopplad till databasen!")
-            sql = f"SELECT username AND password FROM user WHERE username = %s AND password = %s"
-            mycursor.execute(sql, credentials)
-            self.mydb.commit()
+            mycursor.execute("SELECT password FROM user WHERE username = NitroxMan")
+            myresult = mycursor.fetchall()
+            print(myresult)
         else: #New user
             mycursor = self.mydb.cursor()
+
             print("Uppkopplad till databasen!")
-            sql = "INSERT INTO user (username, password) VALUES (%s, %s)"
-            mycursor.execute(sql, credentials)
-            self.mydb.commit()
-            print(mycursor.rowcount, "record inserted.")
+
+            mycursor.execute("SELECT username FROM user")
+            myresult = [name[0] for name in mycursor.fetchall()]
+
+            if credentials[0] in myresult:
+                print("Username in use")
+            else:
+                sql = "INSERT INTO user (username, password) VALUES (%s, %s)"
+                mycursor.execute(sql, credentials)
+                self.mydb.commit()
+                print(mycursor.rowcount, "record inserted.")
 
 
     def client_handler(self, client, address):
