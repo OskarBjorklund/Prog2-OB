@@ -1,11 +1,12 @@
 #Importering av bibliotek
 
 import socket as sock
-import pickle, threading, mysql.connector
+import pickle, threading, mysql.connector, hashlib
 
 HEADER_LENGTH = 10
 IP = "localhost"
 PORT = 8822
+FORMAT = "utf-8"
 
 class Server:
     def __init__(self) -> None:
@@ -50,13 +51,23 @@ class Server:
             users = list(x)
         print(users)
 
-    def login(self, credentials):
+    def login(self, client, credentials):
         if credentials.pop(0) == "1": #Existing user
             mycursor = self.mydb.cursor()
             print("Uppkopplad till databasen!")
-            mycursor.execute("SELECT password FROM user WHERE username = NitroxMan")
+            mycursor.execute(f'SELECT password FROM user WHERE username = "{credentials[0].lower()}"')
             myresult = mycursor.fetchall()
-            print(myresult)
+            if len(myresult) > 0:
+                if myresult[0][0] == encrypt(credentials[1]):
+                    print("Correct password")
+                    client.send("1".encode(FORMAT)) #Rätt inloggning
+                else:
+                    print("Incorrect password/Unknown user")
+                    client.send("0".encode(FORMAT)) #Fel inloggning
+            else:
+                print("Incorrect password")
+                client.send("0".encode(FORMAT))
+    
         else: #New user
             mycursor = self.mydb.cursor()
 
@@ -65,10 +76,16 @@ class Server:
             mycursor.execute("SELECT username FROM user")
             myresult = [name[0] for name in mycursor.fetchall()]
 
-            if credentials[0] in myresult:
+            if credentials[0].lower() in myresult:
                 print("Username in use")
+                client.send("1".encode(FORMAT)) #Username in use, 1 = True
             else:
-                sql = "INSERT INTO user (username, password) VALUES (%s, %s)"
+                credentials[1] = encrypt(credentials[1])
+                credentials.append(credentials[0])
+                credentials[0] = credentials[0].lower()
+                print(credentials[1])
+                client.send("0".encode(FORMAT))
+                sql = "INSERT INTO user (username, password, display_name) VALUES (%s, %s, %s)"
                 mycursor.execute(sql, credentials)
                 self.mydb.commit()
                 print(mycursor.rowcount, "record inserted.")
@@ -80,14 +97,18 @@ class Server:
         connected = True
 
         while connected:
-            recv_msg = client.recv(1024).decode("utf-16")
+            recv_msg = client.recv(1024).decode(FORMAT)
             
             recv_msg = recv_msg.split(",")
 
-            if len(recv_msg) == 3:
-                self.login(recv_msg)
-            
+            if len(recv_msg) == 3: #Login register
+                self.login(client, recv_msg)
+
         client.close()
+
+def encrypt(password):
+        return hashlib.sha256(password.encode(FORMAT)).hexdigest()
+
     
 server = Server()
 

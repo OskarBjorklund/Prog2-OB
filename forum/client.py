@@ -1,12 +1,13 @@
 import socket as sock
 import tkinter as tk
-import pickle, threading, bcrypt
+import pickle, threading
 from tkinter import messagebox
 
 FONT = ("Arial", 10)	
 HEADER_LENGTH = 10
 IP = "localhost"
 PORT = 8822
+FORMAT = "utf-8"
 
 
 class StartGui:
@@ -101,22 +102,31 @@ class StartGui:
         self.reg_frame.pack()
 
     def login(self):
-        if 1==2: #Ska fixa snart
+        list_str = ("1", self.e1.get(), self.e2.get()) 
+        print(list_str)
+        self.client.send_info(list_str)
+
+        if self.client.recv_info() == "1":
+            self.root.destroy()
+
+        else:
             self.l4 = tk.Label(self.log_frame, text = "Invalid login. Check you password.", font = FONT,  fg = "red")
             self.l4.grid(row = 3, column = 0, sticky = "W", pady = 2, columnspan = 2,)
-        else:
-            list_str = ("1", self.e1.get(), self.encrypt(self.e2.get())) #True = Existing user
-            print(list_str)
-            self.client.send_info(list_str)
     
     def register(self):
         if self.e2.get() != self.e3.get():
             self.l5 = tk.Label(self.reg_frame, text = "Passwords don't match.", font = FONT,  fg = "red")
             self.l5.grid(row = 3, column = 0, sticky = "W", pady = 2, columnspan = 2)
         else:
-            list_str = ("0", self.e1.get(), self.encrypt(self.e2.get())) #False = New user
-            print(list_str)
+            list_str = ("0", self.e1.get(), self.e2.get()) #False = New user
             self.client.send_info(list_str)
+            
+            if self.client.recv_info() == "1": #True username already exists
+                self.l5 = tk.Label(self.reg_frame, text = "Username already in use.", font = FONT,  fg = "red")
+                self.l5.grid(row = 3, column = 0, sticky = "W", pady = 2, columnspan = 2)
+            else:
+                self.l5 = tk.Label(self.reg_frame, text = "Account created.", font = FONT,  fg = "green")
+                self.l5.grid(row = 3, column = 0, sticky = "W", pady = 2, columnspan = 2)
 
     def pass_show(self, state):
             if state == True:
@@ -132,16 +142,6 @@ class StartGui:
         else:
             self.reg_frame.pack_forget()
             self.login_gui()
-
-        
-    def encrypt(self, password):
-        bytes = password.encode("utf-8")
-
-        salt = bcrypt.gensalt()
-
-        hash = bcrypt.hashpw(bytes, salt)
-
-        return(hash.decode("utf-8"))
 
     def on_closing(self):
         if messagebox.askyesno(title="Windows message", message="Are you sure you want to quit?"):
@@ -164,18 +164,22 @@ class Client:
         # while self.connected:
         #     msg = input("> ")
 
-        #     self.socket.send(msg.encode("utf-16"))
+        #     self.socket.send(msg.encode(FORMAT))
 
         #     if msg == "/disconnect":
         #         self.connected = False
     
     def send_info(self, credentials):
-        self.socket.send((",".join(credentials)).encode("utf-16"))
+        self.socket.send((",".join(credentials)).encode(FORMAT))
         
-    def recieve_info(self):
+    def recv_info(self):
         while self.connected:
-            msg = self.socket.recv(1024).decode("utf-16")
-            print(f"{msg}")
+            msg = self.socket.recv(1024).decode(FORMAT)
+            return msg
 
+class Forum:
+
+    def __init__(self):
+        pass
 
 client = Client()
