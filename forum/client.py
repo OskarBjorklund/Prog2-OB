@@ -31,10 +31,13 @@ class StartGui:
         self.l1 = tk.Label(self.log_frame, text = "Username:", font = FONT)
         self.l2 = tk.Label(self.log_frame, text = "Password:", font = FONT)
         self.l3 = tk.Label(self.log_frame, text = "Don't have an account?", font = FONT)
+        self.l4 = tk.Label(self.log_frame, font = FONT)
 
         self.l1.grid(row = 0, column = 0, sticky = "W", pady = 2)
         self.l2.grid(row = 1, column = 0, sticky = "W", pady = 2)
         self.l3.grid(row = 4, column = 0, sticky = "W", pady = 2)
+        self.l4.grid(row = 3, column = 0, sticky = "W", pady = 2, columnspan = 2)
+
 
         #Textboxes
         self.pass_str = tk.StringVar()
@@ -68,11 +71,13 @@ class StartGui:
         self.l2 = tk.Label(self.reg_frame, text = "Password:", font = FONT)
         self.l3 = tk.Label(self.reg_frame, text = "Confirm Password:", font = FONT)
         self.l4 = tk.Label(self.reg_frame, text = "Already have an account?", font = FONT)
-
+        self.l5 = tk.Label(self.reg_frame, font = FONT)
+        
         self.l1.grid(row = 0, column = 0, sticky = "W", pady = 2)
         self.l2.grid(row = 1, column = 0, sticky = "W", pady = 2)
         self.l3.grid(row = 2, column = 0, sticky = "W", pady = 2)
         self.l4.grid(row = 5, column = 0, sticky = "W", pady = 2)
+        self.l5.grid(row = 3, column = 0, sticky = "W", pady = 2, columnspan = 2)
 
         #Textboxes
         self.pass_str = tk.StringVar()
@@ -110,23 +115,25 @@ class StartGui:
             self.root.destroy()
 
         else:
-            self.l4 = tk.Label(self.log_frame, text = "Invalid login. Check you password.", font = FONT,  fg = "red")
-            self.l4.grid(row = 3, column = 0, sticky = "W", pady = 2, columnspan = 2,)
+            self.l4.configure(text = "Invalid login. Check you password.", fg = "red")
     
     def register(self):
+
         if self.e2.get() != self.e3.get():
-            self.l5 = tk.Label(self.reg_frame, text = "Passwords don't match.", font = FONT,  fg = "red")
-            self.l5.grid(row = 3, column = 0, sticky = "W", pady = 2, columnspan = 2)
+            self.l5.configure(text = "Passwords don't match.", fg = "red")
         else:
             list_str = ("0", self.e1.get(), self.e2.get()) #False = New user
             self.client.send_info(list_str)
             
-            if self.client.recv_info() == "1": #True username already exists
-                self.l5 = tk.Label(self.reg_frame, text = "Username already in use.", font = FONT,  fg = "red")
-                self.l5.grid(row = 3, column = 0, sticky = "W", pady = 2, columnspan = 2)
+            if self.client.recv_info() == "1": #1 = True, something wrong happend with the registration
+                if len(self.e1.get()) < 1: #Username too short.
+                    self.l5.configure(text = "Username must atleast be 1 character.", fg = "red")
+                elif len(self.e2.get()) < 1: #Password too short.
+                    self.l5.configure(text = "Password must atleast be 1 character.", fg = "red")
+                else: #Username already in use.
+                    self.l5.configure(text = "Username already in use.", fg = "red")
             else:
-                self.l5 = tk.Label(self.reg_frame, text = "Account created.", font = FONT,  fg = "green")
-                self.l5.grid(row = 3, column = 0, sticky = "W", pady = 2, columnspan = 2)
+                self.l5.configure(text = "Account created.", fg = "green")
 
     def pass_show(self, state):
             if state == True:
@@ -158,7 +165,7 @@ class Client:
         
         self.login_gui = StartGui(self)
 
-        thread = threading.Thread(target=self.recieve_info)
+        thread = threading.Thread(target=self.recv_info)
         thread.start()
 
         # while self.connected:

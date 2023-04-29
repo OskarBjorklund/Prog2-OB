@@ -76,9 +76,9 @@ class Server:
             mycursor.execute("SELECT username FROM user")
             myresult = [name[0] for name in mycursor.fetchall()]
 
-            if credentials[0].lower() in myresult:
-                print("Username in use")
-                client.send("1".encode(FORMAT)) #Username in use, 1 = True
+            if credentials[0].lower() in myresult or len(credentials[0]) < 1 or len(credentials[1]) < 1:
+                print("Registration not valid")
+                client.send("1".encode(FORMAT)) #1 = True, något är fel vid registreringen
             else:
                 credentials[1] = encrypt(credentials[1])
                 credentials.append(credentials[0])
