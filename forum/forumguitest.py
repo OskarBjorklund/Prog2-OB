@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
+from datetime import datetime
 import mysql.connector
 
 FONT = ("Arial", 15)	
@@ -73,6 +74,29 @@ class ForumGui:
         self.query = "SELECT title, date_published, author_name, answer_count from post"
         self.mycursor.execute(self.query)
         self.rows = self.mycursor.fetchall()
-        self.update(self.rows)
+
+
+        post_list = []
+        for i, tuples in enumerate(self.rows):
+            #Converts tuples to list in order to convert datetime to str
+            post_list.append(list(tuples))
+            date_convert = post_list[i][1].strftime('%m/%d/%Y')
+            post_list[i][1] = date_convert
+            post_list[i][3] = str(post_list[i][3])
+
+            post_list[i] = "¤".join(post_list[i])
+        
+        post_list ="§".join(post_list)
+
+        post_list = post_list.split("§")
+        for i, posts in enumerate(post_list):
+            post_list[i] = post_list[i].split("¤")
+        print(post_list)
+
+        self.update(post_list)
+
+
+            
+
 
 forum = ForumGui("NitroxEnjoyer")

@@ -1,5 +1,5 @@
 #Importering av bibliotek
-
+import datetime
 import socket as sock
 import pickle, threading, mysql.connector, hashlib
 
@@ -90,6 +90,14 @@ class Server:
                 self.mydb.commit()
                 print(mycursor.rowcount, "record inserted.")
 
+    def update_post_list(self, client):
+        mycursor = self.mydb.cursor()
+        print("Uppkopplad till databasen!")
+        mycursor.execute("SELECT title, date_published, author_name, answer_count from post")
+        myresult = mycursor.fetchall()
+        
+        client.send(covert_post(myresult).encode(FORMAT))
+
 
     def client_handler(self, client, address):
         print(f"New client connected: {address}")
@@ -99,15 +107,29 @@ class Server:
         while connected:
             recv_msg = client.recv(1024).decode(FORMAT)
             
-            recv_msg = recv_msg.split(",")
+            recv_msg = recv_msg.split("§")
 
             if len(recv_msg) == 3: #Login register
                 self.login(client, recv_msg)
+            elif recv_msg[0] == "1":
+                self.update_post_list(client)
 
         client.close()
 
 def encrypt(password):
         return hashlib.sha256(password.encode(FORMAT)).hexdigest()
+
+def covert_post(tuple_list):
+    post_list = []
+    for i, tuples in enumerate(tuple_list):
+        #Converts tuples to list in order to convert datetime to str
+        post_list.append(list(tuples))
+        date_convert = post_list[i][1].strftime('%m/%d/%Y')
+        post_list[i][1] = date_convert
+        post_list[i][3] = str(post_list[i][3])
+        post_list[i] = "¤".join(post_list[i])
+
+    return("§".join(post_list))
 
     
 server = Server()

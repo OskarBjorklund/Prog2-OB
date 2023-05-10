@@ -107,13 +107,12 @@ class StartGui:
         self.reg_frame.pack()
 
     def login(self):
-        list_str = ("1", self.e1.get(), self.e2.get()) 
-        print(list_str)
+        list_str = ("1", self.e1.get(), self.e2.get())
         self.client.send_info(list_str)
 
         if self.client.recv_info() == "1":
-            forum = ForumGui(self.e1.get())
             self.root.destroy()
+            self.forum = ForumGui(self.client)
 
         else:
             self.l4.configure(text = "Invalid login. Check you password.", fg = "red")
@@ -155,36 +154,6 @@ class StartGui:
         if messagebox.askyesno(title="Windows message", message="Are you sure you want to quit?"):
             self.root.destroy()
 
-class Client:
-    def __init__(self) -> None:
-        self.socket = sock.socket(sock.AF_INET, sock.SOCK_STREAM)
-        self.socket.setsockopt(sock.SOL_SOCKET, sock.SO_REUSEADDR, 1)
-        self.socket.connect((IP, PORT))
-        print(f"Client connected to server at {IP}:{PORT}")
-
-        self.connected = True
-        
-        self.login_gui = StartGui(self)
-
-        thread = threading.Thread(target=self.recv_info)
-        thread.start()
-
-        # while self.connected:
-        #     msg = input("> ")
-
-        #     self.socket.send(msg.encode(FORMAT))
-
-        #     if msg == "/disconnect":
-        #         self.connected = False
-    
-    def send_info(self, credentials):
-        self.socket.send((",".join(credentials)).encode(FORMAT))
-        
-    def recv_info(self):
-        while self.connected:
-            msg = self.socket.recv(1024).decode(FORMAT)
-            return msg
-
 class ForumGui:
 
     def __init__(self, current_user):
@@ -195,12 +164,14 @@ class ForumGui:
         self.current_user = current_user
 
         self.start_screen()
+        self.start_thread()
         self.root.mainloop()
 
-    def update(self, rows):
-        for i in rows:
+    def update(self):
+        self.current_user.send_info("1")
+        for i in convert_str(self.current_user.recv_info()):
             self.post_tree.insert("", "end", values = i)
-        self.post_tree.bind("<Double-1>", self.OnDoubleClick)
+            self.post_tree.bind("<Double-1>", self.OnDoubleClick)
 
     def OnDoubleClick(self, event):
         item = self.post_tree.selection()
@@ -244,9 +215,42 @@ class ForumGui:
         self.post_tree.heading(3, text = "Author")
         self.post_tree.heading(4, text = "Answers")
 
-        self.query = "SELECT title, date_published, author_name, answer_count from post"
-        self.mycursor.execute(self.query)
-        self.rows = self.mycursor.fetchall()
-        self.update(self.rows)
+    def start_thread(self):
+        thread = threading.Thread(target=self.update)
+        thread.start()
+
+class Client:
+    def __init__(self) -> None:
+        self.socket = sock.socket(sock.AF_INET, sock.SOCK_STREAM)
+        self.socket.setsockopt(sock.SOL_SOCKET, sock.SO_REUSEADDR, 1)
+        self.socket.connect((IP, PORT))
+        print(f"Client connected to server at {IP}:{PORT}")
+
+        self.connected = True
+        
+        self.login_gui = StartGui(self)
+
+        # while self.connected:
+        #     msg = input("> ")
+
+        #     self.socket.send(msg.encode(FORMAT))
+
+        #     if msg == "/disconnect":
+        #         self.connected = False
+    
+    def send_info(self, credentials):
+        self.socket.send(("§".join(credentials)).encode(FORMAT))
+        
+    def recv_info(self):
+        while self.connected:
+            msg = self.socket.recv(1024).decode(FORMAT)
+            return msg
+    
+def convert_str(recv_str):
+    post_list = recv_str.split("§")
+
+    for i, posts in enumerate(post_list):
+        post_list[i] = post_list[i].split("¤")
+    return post_list
 
 client = Client()
