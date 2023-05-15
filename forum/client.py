@@ -12,12 +12,13 @@ FORMAT = "utf-8"
 
 class StartGui:
 
-    def __init__(self, client):
+    def __init__(self, client, socket):
         self.root = tk.Tk()
         self.root.title("Login")
         self.root.resizable(width=False, height=False)
         self.root.geometry("{}x{}".format(400, 200))
         self.client = client
+        self.socket = socket
         self.login_gui()
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -110,15 +111,15 @@ class StartGui:
         list_str = ("1", self.e1.get(), self.e2.get())
         self.client.send_info(list_str)
 
-        if self.client.recv_info() == "1":
-            self.root.destroy()
-            self.forum = ForumGui(self.client)
+        login_info = self.client.recv_info().split("§")
 
+        if login_info[0] == "1":
+            self.root.destroy()
+            self.forum = ForumGui(self.client, login_info[1], self.socket)
         else:
             self.l4.configure(text = "Invalid login. Check you password.", fg = "red")
     
     def register(self):
-
         if self.e2.get() != self.e3.get():
             self.l5.configure(text = "Passwords don't match.", fg = "red")
         else:
@@ -152,34 +153,51 @@ class StartGui:
 
     def on_closing(self):
         if messagebox.askyesno(title="Windows message", message="Are you sure you want to quit?"):
+            self.socket.shutdown(sock.SHUT_RDWR)
+            self.socket.close()
             self.root.destroy()
 
 class ForumGui:
 
-    def __init__(self, current_user):
+    def __init__(self, current_user, display_name, socket):
         self.root = tk.Tk()
         self.root.geometry("830x500")
         self.root.resizable(False, False)
         self.root.title("Forum")
         self.current_user = current_user
+        self.display_name = display_name
+        self.socket = socket
+
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         self.start_screen()
         self.start_thread()
         self.root.mainloop()
 
     def update(self):
-        self.current_user.send_info("1")
-        for i in convert_str(self.current_user.recv_info()):
-            self.post_tree.insert("", "end", values = i)
-            self.post_tree.bind("<Double-1>", self.OnDoubleClick)
+        while True:
+            posts = convert_str(self.current_user.recv_info())
+            self.clear_tree()
+            for i in posts[::-1]:
+                self.post_tree.insert("", "end", values = i)
+                self.post_tree.bind("<Double-1>", self.double_click)
+    
+    def clear_tree(self):
+        for item in self.post_tree.get_children():
+            self.post_tree.delete(item)
 
-    def OnDoubleClick(self, event):
+    def double_click(self, event):
         item = self.post_tree.selection()
         for i in item:
-            print("You clicked on", self.post_tree.item(i, "values")[0])   
+            print("You clicked on", self.post_tree.item(i, "values")[0])
+            
+    def logout(self):
+        self.root.destroy()
+        create_client()
 
     def post(self):
-        pass
+        list_str = (self.display_name, self.title_entry.get(), self.text_entry.get())
+        self.current_user.send_info(list_str)
 
     def start_screen(self):
         self.wrapper = tk.LabelFrame(self.root)
@@ -188,7 +206,7 @@ class ForumGui:
         self.wrapper.pack(fill = "both", expand = "yes", padx = 10, pady = 10)
         self.post_list.pack(fill = "both", expand = "yes", padx = 10, pady = 10)
 
-        self.username_display = tk.Label(self.wrapper, text = f"Logged in as {self.current_user}", font = FONT)
+        self.username_display = tk.Label(self.wrapper, text = f"Logged in as {self.display_name}", font = FONT)
         self.username_display.grid(row = 0, column = 0, padx = 5, pady = 5)
 
         self.title_label = tk.Label(self.wrapper, text = "Title:", font = FONT)
@@ -201,10 +219,10 @@ class ForumGui:
         self.title_entry.place(x = 435, y = 35, width = 150)
         self.text_entry.place(x = 595, y = 35, width = 200, height = 100)
 
-        self.post_btn = tk.Button(self.wrapper, font = FONT, text = "Make new post", bg = "lime", fg = "white")
+        self.post_btn = tk.Button(self.wrapper, font = FONT, text = "Make new post", bg = "lime", fg = "white", command = self.post)
         self.post_btn.place(x = 435, y = 95)
 
-        self.logout_btn = tk.Button(self.wrapper, text = "Logout")
+        self.logout_btn = tk.Button(self.wrapper, text = "Logout", command = self.logout)
         self.logout_btn.grid(row = 0, column = 1, padx = 5, pady = 5)
 
         self.post_tree = ttk.Treeview(self.post_list, columns = (1, 2, 3 ,4), show = "headings", height = "6")
@@ -215,9 +233,18 @@ class ForumGui:
         self.post_tree.heading(3, text = "Author")
         self.post_tree.heading(4, text = "Answers")
 
+    def post_screen(self, post):
+        pass
+
     def start_thread(self):
-        thread = threading.Thread(target=self.update)
-        thread.start()
+        self.thread = threading.Thread(target=self.update)
+        self.thread.start()
+
+    def on_closing(self):
+        if messagebox.askyesno(title="Windows message", message="Are you sure you want to quit?"):
+            self.socket.shutdown(sock.SHUT_RDWR)
+            self.socket.close()
+            self.root.destroy()
 
 class Client:
     def __init__(self) -> None:
@@ -228,15 +255,7 @@ class Client:
 
         self.connected = True
         
-        self.login_gui = StartGui(self)
-
-        # while self.connected:
-        #     msg = input("> ")
-
-        #     self.socket.send(msg.encode(FORMAT))
-
-        #     if msg == "/disconnect":
-        #         self.connected = False
+        self.login_gui = StartGui(self, self.socket)
     
     def send_info(self, credentials):
         self.socket.send(("§".join(credentials)).encode(FORMAT))
@@ -253,4 +272,7 @@ def convert_str(recv_str):
         post_list[i] = post_list[i].split("¤")
     return post_list
 
-client = Client()
+def create_client():
+    client = Client()
+
+create_client()

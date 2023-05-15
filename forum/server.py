@@ -24,7 +24,7 @@ class Server:
             password="",  # dito lösenord (en tom sträng)
             database="forum"  # byt namn om din databas heter något annat
 )
-
+        self.db_cursor = self.mydb.cursor()
         self.clients = {}
 
     def client_accepter(self):
@@ -35,32 +35,29 @@ class Server:
 
         self.clients[address[1]] = client
 
-    def sendto_database(self, info):
-        mycursor = self.mydb.cursor()
-        print("Uppkopplad till databasen!")
-        sql = "INSERT INTO user (username, password) VALUES (%s, %s)"
-        #val = info.split(",")
-        mycursor.execute(sql, info)
-        self.mydb.commit()
-        print(mycursor.rowcount, "record inserted.")
-
-        # Läsa från databasen
-        mycursor.execute("SELECT * FROM user")
-        myresult = mycursor.fetchall()
-        for x in myresult:
-            users = list(x)
-        print(users)
+    def database_connect(self, insfet, sql, info):
+        print("Database connection established")
+        
+        if insfet == 1: #INS = INSERT
+            self.db_cursor.execute(sql, info)
+            self.mydb.commit()
+            print(self.db_cursor.rowcount, "record inserted.")
+    
+        elif insfet == 0: #FET = FETCH
+            self.db_cursor.execute(sql)
+            result = self.db_cursor.fetchall()
+            return(result)
 
     def login(self, client, credentials):
         if credentials.pop(0) == "1": #Existing user
-            mycursor = self.mydb.cursor()
-            print("Uppkopplad till databasen!")
-            mycursor.execute(f'SELECT password FROM user WHERE username = "{credentials[0].lower()}"')
-            myresult = mycursor.fetchall()
+            myresult = self.database_connect(0, 
+                    f'SELECT password, display_name FROM user WHERE username = "{credentials[0].lower()}"', 
+                    None)
             if len(myresult) > 0:
                 if myresult[0][0] == encrypt(credentials[1]):
                     print("Correct password")
-                    client.send("1".encode(FORMAT)) #Rätt inloggning
+                    client.send(f"1§{myresult[0][1]}".encode(FORMAT)) #Rätt inloggning
+                    self.update_post_list(client)
                 else:
                     print("Incorrect password/Unknown user")
                     client.send("0".encode(FORMAT)) #Fel inloggning
@@ -69,34 +66,37 @@ class Server:
                 client.send("0".encode(FORMAT))
     
         else: #New user
-            mycursor = self.mydb.cursor()
+            usernames = [name[0] for name in self.database_connect(0, "SELECT username FROM user", None)]
 
-            print("Uppkopplad till databasen!")
-
-            mycursor.execute("SELECT username FROM user")
-            myresult = [name[0] for name in mycursor.fetchall()]
-
-            if credentials[0].lower() in myresult or len(credentials[0]) < 1 or len(credentials[1]) < 1:
+            if credentials[0].lower() in usernames or len(credentials[0]) < 1 or len(credentials[1]) < 1:
                 print("Registration not valid")
                 client.send("1".encode(FORMAT)) #1 = True, något är fel vid registreringen
             else:
                 credentials[1] = encrypt(credentials[1])
                 credentials.append(credentials[0])
                 credentials[0] = credentials[0].lower()
-                print(credentials[1])
                 client.send("0".encode(FORMAT))
-                sql = "INSERT INTO user (username, password, display_name) VALUES (%s, %s, %s)"
-                mycursor.execute(sql, credentials)
-                self.mydb.commit()
-                print(mycursor.rowcount, "record inserted.")
+                self.database_connect(1, 
+                        "INSERT INTO user (username, password, display_name) VALUES (%s, %s, %s)", 
+                        credentials)
+    
+    def new_post(self, client, post_info):
+        select_id = self.database_connect(0, 
+                f'SELECT id FROM user WHERE display_name = "{post_info[0]}"', 
+                None)
+        post_input = [post_info[1], post_info[2], post_info[0], select_id[0][0], 0]
+        print(post_input)
+        self.database_connect(1, 
+                    "INSERT INTO post (title, text, author_name, publisher_id, answer_count) VALUES (%s, %s, %s, %s, %s)",
+                    post_input)
+        
+        self.update_post_list(client)
 
     def update_post_list(self, client):
-        mycursor = self.mydb.cursor()
-        print("Uppkopplad till databasen!")
-        mycursor.execute("SELECT title, date_published, author_name, answer_count from post")
-        myresult = mycursor.fetchall()
-        
-        client.send(covert_post(myresult).encode(FORMAT))
+        posts = self.database_connect(0, 
+            "SELECT title, date_published, author_name, answer_count from post", 
+            None)
+        client.send(covert_post(posts).encode(FORMAT))
 
 
     def client_handler(self, client, address):
@@ -108,11 +108,10 @@ class Server:
             recv_msg = client.recv(1024).decode(FORMAT)
             
             recv_msg = recv_msg.split("§")
-
-            if len(recv_msg) == 3: #Login register
+            if recv_msg[0] == "1" or recv_msg[0] == "0":
                 self.login(client, recv_msg)
-            elif recv_msg[0] == "1":
-                self.update_post_list(client)
+            else:
+                self.new_post(client, recv_msg)
 
         client.close()
 

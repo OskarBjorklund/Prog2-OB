@@ -75,7 +75,7 @@ class ForumGui:
         self.mycursor.execute(self.query)
         self.rows = self.mycursor.fetchall()
 
-
+        print(self.rows)
         post_list = []
         for i, tuples in enumerate(self.rows):
             #Converts tuples to list in order to convert datetime to str
@@ -91,7 +91,6 @@ class ForumGui:
         post_list = post_list.split("§")
         for i, posts in enumerate(post_list):
             post_list[i] = post_list[i].split("¤")
-        print(post_list)
 
         self.update(post_list)
 
