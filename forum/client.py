@@ -51,7 +51,7 @@ class StartGui:
 
         #Buttons
         self.btn1 = tk.Button(self.log_frame, text = "Login", font = FONT, command = self.login)
-        self.btn2 = tk.Button(self.log_frame, text = "Register", font = FONT, command = lambda: self.hide_interface(True))
+        self.btn2 = tk.Button(self.log_frame, text = "Register", font = FONT, command = lambda: self.switch_interface(True))
 
         self.btn1.grid(row = 2, column = 0, pady = 2, columnspan = 2)
         self.btn2.grid(row = 4, column = 1, pady = 2)
@@ -94,7 +94,7 @@ class StartGui:
 
         #Buttons
         self.btn1 = tk.Button(self.reg_frame, text = "Register", font = FONT, command = self.register)
-        self.btn2 = tk.Button(self.reg_frame, text = "Login", font = FONT, command = lambda: self.hide_interface(False))
+        self.btn2 = tk.Button(self.reg_frame, text = "Login", font = FONT, command = lambda: self.switch_interface(False))
 
         self.btn1.grid(row = 4, column = 0, pady = 2, columnspan = 2)
         self.btn2.grid(row = 5, column = 1, pady = 2)
@@ -143,7 +143,7 @@ class StartGui:
                 self.e2.config(show="*"*(not self.pass_int.get()))
                 self.e3.config(show="*"*(not self.pass_int.get()))
 
-    def hide_interface(self, state):
+    def switch_interface(self, state):
         if state == True:
             self.log_frame.pack_forget()
             self.register_gui()
@@ -189,14 +189,14 @@ class ForumGui:
     def double_click(self, event):
         item = self.post_tree.selection()
         for i in item:
-            print("You clicked on", self.post_tree.item(i, "values")[0])
+            self.switch_interface(True, self.post_tree.item(i, "values")[0])
             
     def logout(self):
         self.root.destroy()
         create_client()
 
     def post(self):
-        list_str = (self.display_name, self.title_entry.get(), self.text_entry.get())
+        list_str = (self.display_name, self.title_entry.get(), self.text.get("1.0", "end"))
         self.current_user.send_info(list_str)
 
     def start_screen(self):
@@ -211,13 +211,13 @@ class ForumGui:
 
         self.title_label = tk.Label(self.wrapper, text = "Title:", font = FONT)
         self.text_label = tk.Label(self.wrapper, text = "Message:", font = FONT)
-        self.title_entry = tk.Entry(self.wrapper)
-        self.text_entry = tk.Entry(self.wrapper)
+        self.title_entry = tk.Entry(self.wrapper, font = FONT)
+        self.text = tk.Text(self.wrapper, font = FONT)
 
         self.title_label.place(x = 485, y = 5)
         self.text_label.place(x = 650, y = 5)
         self.title_entry.place(x = 435, y = 35, width = 150)
-        self.text_entry.place(x = 595, y = 35, width = 200, height = 100)
+        self.text.place(x = 595, y = 35, width = 200, height = 100)
 
         self.post_btn = tk.Button(self.wrapper, font = FONT, text = "Make new post", bg = "lime", fg = "white", command = self.post)
         self.post_btn.place(x = 435, y = 95)
@@ -234,11 +234,25 @@ class ForumGui:
         self.post_tree.heading(4, text = "Answers")
 
     def post_screen(self, post):
-        pass
+        self.post_frame = tk.LabelFrame(self.root)
+        self.comment_frame = tk.LabelFrame(self.root)
 
+        self.post_frame.pack(fill = "both", expand = "yes", padx = 10, pady = 10)
+        self.comment_frame.pack(fill = "both", expand = "yes", padx = 10, pady = 10)
+
+        self.title_label = tk.Label(self.post_frame)
     def start_thread(self):
         self.thread = threading.Thread(target=self.update)
         self.thread.start()
+
+    def switch_interface(self, state, post):
+        if state == True: #True = In startscreen
+            self.wrapper.forget()
+            self.post_list.forget()
+            self.post_screen(post)
+        else:
+            pass
+            #self.start_screen()
 
     def on_closing(self):
         if messagebox.askyesno(title="Windows message", message="Are you sure you want to quit?"):
