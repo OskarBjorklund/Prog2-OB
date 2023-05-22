@@ -1,0 +1,23 @@
+{
+    "user": {
+        "id": "%s bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT",
+        "username": "%s varchar(100)",
+        "password": "%s varchar(100)",
+        "display_name": "%s varchar(100)"
+    },
+    "post": {
+        "id": "%s bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT",
+        "title": "%s varchar(100)",
+        "text": "%s text",
+        "author_name": "%s varchar(100)",
+        "answer_count": "%s bigint(20)",
+        "date_published": "%s timestamp DEFAULT CURRENT_TIMESTAMP"
+    },
+    "comment": {
+        "id": "%s bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT",
+        "text": "%s text",
+        "comment_user": "%s varchar(100)",
+        "date_commented": "%s timestamp DEFAULT CURRENT_TIMESTAMP",
+        "connected_post": "%s varchar(100)"
+    }
+}
