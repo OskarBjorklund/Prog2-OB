@@ -14,8 +14,6 @@ def main():
         last_names.append(lines[i + 1].strip())
         first_names.append(lines[i + 2].strip())
 
-    
-
     # Example: Printing the first few entries
     for i in range(0, len(lines) // 3):  # Change the range to print more entries
         print(f"Namn: {first_names[i]} {last_names[i]} Personnr: {social_security[i]}")
