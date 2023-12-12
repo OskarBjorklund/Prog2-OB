@@ -48,11 +48,9 @@ class Gui:
   def find_info(self):
     mycursor = mydb.cursor()
     # Läsa från databasen
-    mycursor.execute("SELECT * FROM user")
+    mycursor.execute('SELECT password FROM user WHERE username = "NitroxMan"')
     myresult = mycursor.fetchall()
-    for x in myresult:
-      per = list(x)
-    print(per)
+    print(myresult)
     
 
 
