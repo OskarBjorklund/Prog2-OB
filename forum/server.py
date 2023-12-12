@@ -1,7 +1,6 @@
 #Importering av bibliotek
-
 import socket as sock
-import pickle, threading, mysql.connector
+import threading, mysql.connector
 
 HEADER_LENGTH = 10
 IP = "localhost"
@@ -22,7 +21,7 @@ class Server:
             user="root",  # standardanvändarnamn för XAMPP
             password="",  # dito lösenord (en tom sträng)
             database="forum"  # byt namn om din databas heter något annat
-)
+        )
 
         self.clients = {}
 
@@ -54,7 +53,7 @@ class Server:
         if credentials.pop(0) == "1": #Existing user
             mycursor = self.mydb.cursor()
             print("Uppkopplad till databasen!")
-            mycursor.execute("SELECT password FROM user WHERE username = NitroxMan")
+            mycursor.execute('SELECT password FROM user WHERE username = "NitroxMan"')
             myresult = mycursor.fetchall()
             print(myresult)
         else: #New user

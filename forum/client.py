@@ -141,7 +141,7 @@ class StartGui:
 
         hash = bcrypt.hashpw(bytes, salt)
 
-        return(hash.decode("utf-8"))
+        return(hash.decode("utf-8")) # 8=============D' 
 
     def on_closing(self):
         if messagebox.askyesno(title="Windows message", message="Are you sure you want to quit?"):
