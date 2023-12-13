@@ -1,0 +1,15 @@
+Andersson;Eva;070-1112233;eva.andersson@kth.se;Storgatan 1, Stockholm
+Bergman;Oskar;076-4445566;oskar.bergman@gmail.com;Lillgatan 5, Göteborg
+Carlsson;Maria;073-7778899;maria.carlsson@icloud.com;Lergatan 12, Malmö
+Dahl;Johan;072-1011121;johan.dahl@hotmail.com;Björkvägen 8, Uppsala
+Eriksson;Anna;071-3141516;anna.eriksson@gmail.com;Ekvägen 14, Örebro
+Forsberg;Karl;074-1718192;karl.forsberg@hotmail.com;Granvägen 3, Västerås
+Gustafsson;Sofia;075-2021223;sofia.gustafsson@outlook.com;Tallgatan 6, Linköping
+Håkansson;David;076-2324252;david.hakansson@live.com;Bokvägen 9, Norrköping
+Isaksson;Linda;072-2627282;linda.isaksson@yahoo.com;Askvägen 11, Jönköping
+Johansson;Peter;070-2930313;peter.johansson@protonmail.com;Almvägen 7, Lund
+Karlsson;Emma;071-3233344;emma.karlsson@aol.com;Rosvägen 2, Helsingborg
+Lindström;Anders;073-3536374;anders.lindstrom@msn.com;Kastanjegatan 15, Karlstad
+Månsson;Sara;075-3839404;sara.mansson@me.com;Platanvägen 10, Eskilstuna
+Nilsson;Fredrik;072-4142434;fredrik.nilsson@rocketmail.com;Ekollonvägen 13, Östersund
+Öberg;Lisa;074-4445465;lisa.oberg@yandex.com;Björklundsgatan 18, Gävle
