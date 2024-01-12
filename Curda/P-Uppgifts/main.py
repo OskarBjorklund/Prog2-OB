@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
 import os
+from error_handling import check_file_existance
 
 FONT = ("Arial", 10)
 
@@ -9,7 +10,7 @@ class StartGui:
         self.root = tk.Tk()
         self.root.title("Register")
         self.root.resizable(width=False, height=False)
-        self.root.geometry("{}x{}".format(500, 600))
+        self.root.geometry("{}x{}".format(500, 200))
 
         self.main_gui()
         self.root.mainloop()
@@ -20,6 +21,8 @@ class StartGui:
 
         self.main_frame.pack(fill="both", expand = "yes", padx = 10, pady = 10)
 
+        self.main_frame.columnconfigure(0, weight = 1)
+
         self.new_registry_button = tk.Button(self.main_frame, text = "Skapa nytt register", font = FONT)
 
         self.browse_registry_button = tk.Button(self.main_frame, text = "Bläddra bland register", font = FONT)
@@ -28,11 +31,11 @@ class StartGui:
         self.manual_search_entry = tk.Entry(self.main_frame, font = FONT)
         self.error_label = tk.Label(self.main_frame, font = FONT, fg = "red")
 
-        self.new_registry_button.grid(row = 0, column = 0, pady = 5)
-        self.browse_registry_button.grid(row = 1, column = 0, pady = 5)
-        self.manual_search_label.grid(row = 2, column = 0)
-        self.manual_search_entry.grid(row = 3, column = 0)
-        self.error_label.grid(row = 4, column = 0)
+        self.new_registry_button.grid(row = 0, column = 0, pady = 5, sticky = "ew")
+        self.browse_registry_button.grid(row = 1, column = 0, pady = 5, sticky = "ew")
+        self.manual_search_label.grid(row = 2, column = 0, sticky = "ew")
+        self.manual_search_entry.grid(row = 3, column = 0, sticky = "ew")
+        self.error_label.grid(row = 4, column = 0, sticky = "ew")
 
         self.manual_search_entry.bind("<Return>", self.manual_search_registry)
         
@@ -45,12 +48,9 @@ class StartGui:
     def search_registry(self, registry_name):
         # Check if the file exists before destroying the root
         file_path = os.path.join(os.path.dirname(__file__), registry_name)
-        if os.path.exists(file_path):
+        if check_file_existance(file_path, registry_name):
             self.root.destroy()
             self.registry = open_file(registry_name)
-        else:
-            messagebox.showerror("Error", f"File '{registry_name}' not found in the current directory.")
-
 
     def on_closing(self):
         pass
