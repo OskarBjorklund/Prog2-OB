@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
 import os
-from error_handling import check_file_existance
+from error_handling import check_file_existance, correct_registry_format
 
 FONT = ("Arial", 10)
 
@@ -23,23 +23,30 @@ class StartGui:
 
         self.main_frame.columnconfigure(0, weight = 1)
 
-        self.new_registry_button = tk.Button(self.main_frame, text = "Skapa nytt register", font = FONT)
+        self.new_registry_label = tk.Label(self.main_frame, text = "Skapa nytt register", font = FONT)
+        self.new_registry_entry = tk.Entry(self.main_frame, font = FONT)
 
         self.browse_registry_button = tk.Button(self.main_frame, text = "Bläddra bland register", font = FONT)
 
         self.manual_search_label = tk.Label(self.main_frame, text = "Manuel sökning", font = FONT)
         self.manual_search_entry = tk.Entry(self.main_frame, font = FONT)
-        self.error_label = tk.Label(self.main_frame, font = FONT, fg = "red")
 
-        self.new_registry_button.grid(row = 0, column = 0, pady = 5, sticky = "ew")
-        self.browse_registry_button.grid(row = 1, column = 0, pady = 5, sticky = "ew")
-        self.manual_search_label.grid(row = 2, column = 0, sticky = "ew")
-        self.manual_search_entry.grid(row = 3, column = 0, sticky = "ew")
-        self.error_label.grid(row = 4, column = 0, sticky = "ew")
+        self.new_registry_label.grid(row = 0, column = 0, pady = 5, sticky = "ew")
+        self.new_registry_entry.grid(row = 1, column = 0, pady = 5, sticky = "ew")
+        self.browse_registry_button.grid(row = 2, column = 0, pady = 5, sticky = "ew")
+        self.manual_search_label.grid(row = 3, column = 0, sticky = "ew")
+        self.manual_search_entry.grid(row = 4, column = 0, sticky = "ew")
 
+        self.new_registry_entry.bind("<Return>", self.create_new_registry)
         self.manual_search_entry.bind("<Return>", self.manual_search_registry)
         
         self.main_frame.pack() 
+
+    def create_new_registry(self, event):
+        new_registry_name = self.new_registry_entry.get()
+        self.root.destroy()
+        self.registry = RegistryGui(new_registry_name, [])
+        
 
     def manual_search_registry(self, event):
         text = self.manual_search_entry.get()
@@ -49,8 +56,9 @@ class StartGui:
         # Check if the file exists before destroying the root
         file_path = os.path.join(os.path.dirname(__file__), registry_name)
         if check_file_existance(file_path, registry_name):
-            self.root.destroy()
-            self.registry = open_file(registry_name)
+            if correct_registry_format(file_path):
+                self.root.destroy()
+                self.registry = open_file(registry_name)
 
     def on_closing(self):
         pass
@@ -61,7 +69,7 @@ class RegistryGui:
         self.person_list = person_list
 
         self.root = tk.Tk()
-        self.root.title("Register")
+        self.root.title(self.register_name)
         self.root.resizable(width=False, height=False)
         self.root.geometry("{}x{}".format(800, 600))
 
@@ -178,7 +186,7 @@ class RegistryGui:
         style = ttk.Style()
         style.configure("Treeview", fieldbackground="white")
         style.configure("Treeview.Heading", font = FONT)
-        style.configure("Treeview.Cell", wraplength=150)  # Wrap lenght, same width as title
+        style.configure("Treeview.Cell", wraplength = 125)
 
         row_height = 75
 
@@ -186,6 +194,16 @@ class RegistryGui:
         style.configure("Custom.Treeview", rowheight = row_height)
 
         self.list_tree.pack(fill = "both", expand = "yes")
+
+        # Create a vertical scrollbar for the list_tree
+        scrollbar = ttk.Scrollbar(self.list_frame, orient = "vertical", command = self.list_tree.yview)
+        # Configure the Treeview to update the scrollbar
+        self.list_tree.configure(yscrollcommand = scrollbar.set)
+
+        # Pack the scrollbar to the right side of the list_frame
+        scrollbar.pack(side="right", fill = "y")
+        # Pack the Treeview to fill the rest of the space
+        self.list_tree.pack(side = "left", fill = "both", expand = "yes")
 
         self.insert_tree(self.to_nested_list())
 
@@ -216,6 +234,7 @@ def create_person_from_line(line):
 
 def open_file(filename):
     file_path = os.path.join(os.path.dirname(__file__), filename)
+
     person_list = []
     with open(file_path, 'r', encoding='utf-8') as file:  # Specify UTF-8 encoding
         for line in file:
