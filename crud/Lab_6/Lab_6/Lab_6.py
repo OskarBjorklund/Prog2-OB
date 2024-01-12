@@ -1,3 +1,5 @@
+from error_handling import open_file
+
 class School:
     def __init__(self):
         self.student_list = []
@@ -32,26 +34,25 @@ class Student:
     def give_personal_number(self):
         return self.personal_number
     
+
 def fetch_list_of_students_from_file():
     wrong_input = True
     while wrong_input:
-        try:
-            file_name = str(input("Skriv in namnet på filen som ska öppnas: "))
-            file_with_students = open(file_name, "r", encoding="utf-8")
+        file_name = input("Skriv in namnet på filen som ska öppnas: ")
+        file_with_students = open_file(file_name)
 
+        if file_with_students:
             list_from_file_with_students = file_with_students.readlines()
-
             file_with_students.close()
 
-            for i in range(0, len(list_from_file_with_students)):
+            for i in range(len(list_from_file_with_students)):
                 list_from_file_with_students[i] = list_from_file_with_students[i].strip()
 
             print(list_from_file_with_students)
 
             return list_from_file_with_students
-        except:
-            print("Filen hittades inte. Försök igen.\n")
-
+        else:
+            print("Försök igen att öppna filen.")
 
 def main():
     school = School()
