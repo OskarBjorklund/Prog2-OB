@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
 import os
-from error_handling import check_file_existance, correct_registry_format
+from error_handling import check_file_existance, correct_registry_format, is_valid_email, is_valid_phone, is_valid_input_lenght
 
 FONT = ("Arial", 10)
 
@@ -10,7 +10,7 @@ class StartGui:
         self.root = tk.Tk()
         self.root.title("Register")
         self.root.resizable(width=False, height=False)
-        self.root.geometry("{}x{}".format(500, 200))
+        self.root.geometry("{}x{}".format(500, 220))
 
         self.main_gui()
         self.root.mainloop()
@@ -31,11 +31,14 @@ class StartGui:
         self.manual_search_label = tk.Label(self.main_frame, text = "Manuel sökning", font = FONT)
         self.manual_search_entry = tk.Entry(self.main_frame, font = FONT)
 
+        self.combine_registry_button = tk.Button(self.main_frame, text = "Samkörning av register", font = FONT)
+
         self.new_registry_label.grid(row = 0, column = 0, pady = 5, sticky = "ew")
         self.new_registry_entry.grid(row = 1, column = 0, pady = 5, sticky = "ew")
         self.browse_registry_button.grid(row = 2, column = 0, pady = 5, sticky = "ew")
-        self.manual_search_label.grid(row = 3, column = 0, sticky = "ew")
-        self.manual_search_entry.grid(row = 4, column = 0, sticky = "ew")
+        self.manual_search_label.grid(row = 3, column = 0, pady = 5, sticky = "ew")
+        self.manual_search_entry.grid(row = 4, column = 0, pady = 5, sticky = "ew")
+        self.combine_registry_button.grid(row = 5, column = 0, pady = 5, sticky = "ew")
 
         self.new_registry_entry.bind("<Return>", self.create_new_registry)
         self.manual_search_entry.bind("<Return>", self.manual_search_registry)
@@ -76,12 +79,6 @@ class RegistryGui:
         self.register_gui()
         self.root.mainloop()
 
-    def to_nested_list(self):
-        nested_list = []
-        for person in self.person_list:
-            nested_list.append([person.first_name, person.last_name, person.phone, person.email, person.address])
-        return nested_list
-
     def insert_tree(self, children):
         """
         This method inserts children into specified tree
@@ -107,12 +104,28 @@ class RegistryGui:
             print(self.list_tree.item(i, "values")[0])
 
     def add_person(self):
-        # Retrieve the data from entry widgets
+    # Retrieve the data from entry widgets
         first_name = self.first_name_entry.get()
         last_name = self.last_name_entry.get()
         phone = self.phone_entry.get()
         email = self.email_entry.get()
         address = self.address_entry.get()
+
+        # Validate email and phone
+        if not is_valid_email(email):
+            return  # Stop the function if the email is invalid
+
+        if not is_valid_phone(phone):
+            return  # Stop the function if the phone is invalid
+        
+        if not is_valid_input_lenght(first_name):
+            return  # Stop the function if the phone is invalid
+        
+        if not is_valid_input_lenght(last_name):
+            return  # Stop the function if the phone is invalid
+        
+        if not is_valid_input_lenght(address):
+            return  # Stop the function if the phone is invalid
 
         # Create a new Person object
         new_person = Person(last_name, first_name, phone, email, address)
@@ -128,14 +141,52 @@ class RegistryGui:
         self.address_entry.delete(0, tk.END)
 
         self.clear_tree()
-        self.insert_tree(self.to_nested_list())
+        self.insert_tree(to_nested_list(self.person_list))
+
+    def return_to_start_menu(self):
+        self.root.destroy()
+        start_program()
+
+    def save_file_button(self):
+        save_file(self.register_name, format_person_list_to_file_format(self.person_list))
+
+    def create_person_list(self, line, registry):
+        attributes = line.strip().split(";")
+        person = Person(*attributes)
+        registry.person_list.append(person)
+    
+    def print_persons(self):
+        for person in self.person_list:
+            print(person)
     
     def register_gui(self):
         self.wrapper = tk.LabelFrame(self.root)
         self.list_frame = tk.LabelFrame(self.root)
 
-        self.wrapper.pack(fill="both", expand="yes", padx=10, pady=10)
-        self.list_frame.pack(fill="both", expand="yes", padx=10, pady=10)
+        self.wrapper.pack(fill = "both", expand = "yes", padx = 10, pady = 10)
+        self.list_frame.pack(fill = "both", expand = "yes", padx = 10, pady = 10)
+
+        # Create a menubar
+        self.menubar = tk.Menu(self.root)
+
+        # File menu
+        self.file_menu = tk.Menu(self.menubar, tearoff = 0)
+        self.file_menu.add_command(label = "Spara", command = self.save_file_button)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label = "Återgå till huvudmeny", command = self.return_to_start_menu)
+
+        self.help_menu = tk.Menu(self.menubar, tearoff = 0)
+        self.help_menu.add_command(label="Instruktioner")
+
+        # Adding the "File" menu to the menubar
+        self.menubar.add_cascade(label = "Fil", menu = self.file_menu)
+        self.menubar.add_cascade(label = "Hjälp", menu = self.help_menu)
+
+        # Display the menubar
+        self.root.config(menu=self.menubar)
+
+        self.search_option = ttk.Combobox(self.wrapper, values=["Telefon", "Namn", "E-Post"])
+        self.search_option.set("Telefon")  # Set the default value
 
         self.first_name_entry = tk.Entry(self.wrapper, font = FONT)
         self.first_name_label = tk.Label(self.wrapper, text = "Förnamn", font = FONT)
@@ -162,6 +213,7 @@ class RegistryGui:
         self.address_label.grid(row = 0, column = 4, pady = 5, padx = 5)
 
         self.add_person_button.grid(row = 2, column = 2, pady = 5, padx = 5)
+        self.search_option.grid(row = 3, column = 2, pady = 5, padx = 5)
 
         self.list_frame.pack_propagate(0) 
 
@@ -205,17 +257,7 @@ class RegistryGui:
         # Pack the Treeview to fill the rest of the space
         self.list_tree.pack(side = "left", fill = "both", expand = "yes")
 
-        self.insert_tree(self.to_nested_list())
-
-
-    def create_person_list(self, line, registry):
-        attributes = line.strip().split(";")
-        person = Person(*attributes)
-        registry.person_list.append(person)
-    
-    def print_persons(self):
-        for person in self.person_list:
-            print(person)
+        self.insert_tree(to_nested_list(self.person_list))
 
 class Person:
     def __init__(self, first_name, last_name, phone, email, address):
@@ -242,6 +284,33 @@ def open_file(filename):
             person_list.append(person)
         registry = RegistryGui(filename, person_list)  # Creating RegistryGUI instance with person_list
         return registry
+    
+def to_nested_list(person_list):
+        nested_list = []
+        for person in person_list:
+            nested_list.append([person.first_name, person.last_name, person.phone, person.email, person.address])
+        return nested_list
 
+def format_person_list_to_file_format(person_list):
+    formatted_text_list = []
 
-StartGui()
+    for person in person_list:
+        # Construct the formatted string for each person
+        formatted_person = f"{person.last_name};{person.first_name};{person.phone};{person.email};{person.address}"
+        formatted_text_list.append(formatted_person)
+
+    # Join the formatted strings with newline characters to create the final text representation
+    formatted_text = "\n".join(formatted_text_list)
+
+    return formatted_text
+
+def save_file(filename, list_of_personal_info):
+    script_directory = os.path.dirname(__file__)
+    file_path = os.path.join(script_directory, filename)
+    with open(file_path, 'w', encoding='utf-8') as file:
+        file.write(list_of_personal_info)
+
+def start_program():  
+    StartGui()
+
+start_program()
