@@ -9,3 +9,4 @@ Parker;Breanna;079-4179151;breanna.parker@gmail.com;096 Maria Pines, Port Kimber
 Lee;Susan;077-4045621;susan.lee@hotmail.com;68093 Johnson Road, Port Samanthaland
 Palmer;Kristen;070-4375064;kristen.palmer@hotmail.com;222 Wilson Crossroad Suite 887, Virginiaport
 Mays;Laura;079-1551067;laura.mays@gmail.com;879 Petersen Station, Peterport
+Göransson;Örjan;071-1111111;göran@kth.se;Kthstaden 1, Stockholm

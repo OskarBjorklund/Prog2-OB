@@ -1,7 +1,14 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
-import os
-from error_handling import check_file_existance, correct_registry_format, valid_filename, person_exists, is_valid_id_format, combine_registry_error
+import os, sys
+
+try:
+    from error_handling import (check_file_existance, correct_registry_format, 
+                                valid_filename, person_exists, 
+                                is_valid_id_format, combine_registry_error)
+except ImportError:
+    messagebox.showerror("Error", "Avslutar programmet på grund av saknad fil 'error_handling.py'.")
+    sys.exit()
 
 FONT = ("Arial", 10)
 REGISTER_BROWSER_FILE = "register.txt"
@@ -106,7 +113,7 @@ class StartGui:
         self.file_menu.add_command(label = "Återgå till huvudmeny", command = lambda: return_to_start_menu(self.root))
 
         self.help_menu = tk.Menu(self.menubar, tearoff = 0)
-        self.help_menu.add_command(label="Instruktioner")
+        self.help_menu.add_command(label="Instruktioner", command = get_instruction)
 
         # Adding the "Fil" menu to the menubar
         self.menubar.add_cascade(label = "Fil", menu = self.file_menu)
@@ -295,7 +302,7 @@ class RegistryGui:
             return  # Stop the function if the phone number is invalid
         if not is_valid_id_format(email, "email"):
             return  # Stop the function if the email is invalid
-        if not is_valid_id_format(address, "address"):
+        if not is_valid_id_format(address, "adress"):
             return  # Stop the function if the address is invalid
 
         # Create a new Person object
@@ -381,6 +388,10 @@ class RegistryGui:
             return  # Stop the search if the email is invalid
         elif search_criteria == "Sök efter telefon" and not is_valid_id_format(query, "phone"):
             return  # Stop the search if the phone is invalid
+        elif search_criteria == "Sök efter förnamn" and not is_valid_id_format(query, "name"):
+            return  # Stop the search if the phone is invalid
+        elif search_criteria == "Sök efter efternamn" and not is_valid_id_format(query, "name"):
+            return # Stop the search if the phone is invalid
 
         # Perform the search based on the selected criteria
         matching_persons = []
@@ -388,10 +399,18 @@ class RegistryGui:
             matching_persons = [person for person in self.person_list if person.phone == query]
         elif search_criteria == "Sök efter E-Post" and person_exists(self.person_list, query, "email"):
             matching_persons = [person for person in self.person_list if person.email == query]
-        elif search_criteria == "Sök efter namn":
+        elif search_criteria == "Sök efter hela namnet":
             query = query.lower()  # Convert query to lowercase for case-insensitive search
-            if person_exists(self.person_list, query, "name"):
+            if person_exists(self.person_list, query, "full_name"):
                 matching_persons = [person for person in self.person_list if f"{person.first_name} {person.last_name}".lower() == query]
+        elif search_criteria == "Sök efter förnamn":
+            query = query.lower()  # Convert query to lowercase for case-insensitive search
+            if person_exists(self.person_list, query, "first_name"):
+                matching_persons = [person for person in self.person_list if person.first_name.lower() == query]
+        elif search_criteria == "Sök efter efternamn":
+            query = query.lower()  # Convert query to lowercase for case-insensitive search
+            if person_exists(self.person_list, query, "last_name"):
+                matching_persons = [person for person in self.person_list if person.last_name.lower() == query]
 
         # Display the search results
         if matching_persons:
@@ -432,14 +451,14 @@ class RegistryGui:
         new_change = self.new_change_entry.get()
 
         # Check if the person exists and update the specified attribute
-        if person_exists(self.person_list, target_name, "name"):
+        if person_exists(self.person_list, target_name, "full_name"):
             for person in self.person_list:
                 if f"{person.first_name} {person.last_name}".lower() == target_name:
                     if change_option == "Ändra telefon" and is_valid_id_format(new_change, "phone"):
                         person.phone = new_change
                     elif change_option == "Ändra E-Post" and is_valid_id_format(new_change, "email"):
                         person.email = new_change
-                    elif change_option == "Ändra address":
+                    elif change_option == "Ändra address" and is_valid_id_format(new_change, "adress"):
                         person.address = new_change
 
             # Clear the entry fields after updating
@@ -461,7 +480,7 @@ class RegistryGui:
         target_name = self.delete_target_entry.get().lower()
 
         # Check if the person exists in the list and delete if found
-        if person_exists(self.person_list, target_name, "name"):
+        if person_exists(self.person_list, target_name, "full_name"):
             for i, person in enumerate(self.person_list):
                 if f"{person.first_name} {person.last_name}".lower() == target_name:
                     del self.person_list[i]  # Delete the person
@@ -506,7 +525,7 @@ class RegistryGui:
         self.file_menu.add_command(label = "Återgå till huvudmeny", command = lambda: return_to_start_menu(self.root))
 
         self.help_menu = tk.Menu(self.menubar, tearoff = 0)
-        self.help_menu.add_command(label="Instruktioner")
+        self.help_menu.add_command(label="Instruktioner", command = get_instruction)
 
         # Adding the "File" menu to the menubar
         self.menubar.add_cascade(label = "Fil", menu = self.file_menu)
@@ -529,8 +548,8 @@ class RegistryGui:
         self.add_person_button = tk.Button(self.wrapper, text = "Lägg till person", font = FONT, command = self.add_person)
 
         # Searching for a person widgets
-        self.search_option = ttk.Combobox(self.wrapper, values=["Sök efter telefon", "Sök efter namn", "Sök efter E-Post"])
-        self.search_option.set("Sök efter telefon")  # Set the default value
+        self.search_option = ttk.Combobox(self.wrapper, values=["Sök efter förnamn", "Sök efter efternamn", "Sök efter hela namnet", "Sök efter telefon", "Sök efter E-Post"])
+        self.search_option.set("Sök efter förnamn")  # Set the default value
         self.search_entry = tk.Entry(self.wrapper, font = FONT)
         self.search_button = tk.Button(self.wrapper, text = "Sök", font = FONT, command = self.search_button_press)
 
@@ -866,6 +885,22 @@ def to_nested_list(person_list):
         nested_list.append([person.last_name, person.first_name, person.phone, person.email, person.address])
     return nested_list
 
+def get_instruction():
+    info_text = (
+    "Register:\n"
+    "Namn: [A-Ö] - Ex Linda\n"
+    "Telefonnummer: 07[0-9] + \"-\" + 7*[0-9] - Ex 071-1234567\n"
+    "E-Post: [A-Ö] + \"@\" + [A-Ö] + \".\" + [A-Ö] - Ex kth@kth.se\n"
+    "Address: Gata address + \", \" + Stad - Ex Kthvägen 10, Stockholm\n\n"
+    "\"N/A\" Används vid okänd info.\n\n"
+    "Glöm inte att spara filen!\n\n"
+    "Bläddra:\n"
+    "Dubbelklicka på en fil.\n\n"
+    "Samköra:\n"
+    "Markera två filer."
+    )
+    messagebox.showinfo("Instruktioner", info_text)
+
 def find_duplicates(list1, list2):
     """
     Finds duplicate items that are present in both list1 and list2.
@@ -949,7 +984,7 @@ def save_file(filename, list_of_personal_info):
         file.write(list_of_personal_info)
 
 
-def update_registry_list_file(new_registry_name, registry_list_file="register.txt"):
+def update_registry_list_file(new_registry_name, registry_list_file=REGISTER_BROWSER_FILE):
     """
     Updates the registry list file with a new registry name.
 
@@ -962,8 +997,9 @@ def update_registry_list_file(new_registry_name, registry_list_file="register.tx
     script_directory = os.path.dirname(__file__)
     file_path = os.path.join(script_directory, registry_list_file)
 
-    with open(file_path, 'a', encoding='utf-8') as file:  # 'a' mode for appending
-        file.write(new_registry_name + ";")  # Append the new registry name
+    if new_registry_name not in open_registry_browser_files():
+        with open(file_path, 'a', encoding='utf-8') as file:  # 'a' mode for appending
+            file.write(new_registry_name + ";")  # Append the new registry name
 
 def return_to_start_menu(target_root):
     """

@@ -39,10 +39,10 @@ def is_valid_id_format(input_value, validation_type, line_num=None):
         pattern = r"07[0-9]-[0-9]{7}$" # Format 07(0-9)-(0-9)*7
         error_message = "Felaktigt telefonformat"
     elif validation_type == "name":
-        pattern = r"^[A-Za-z]+$" # Only letters
+        pattern = r"^[A-Za-zÅÄÖåäö]+$" # Only letters
         error_message = "Felaktigt namnformat"
-    elif validation_type == "address":
-        pattern = r"^[A-Za-z]+.*" # Letters and symbols
+    elif validation_type == "adress":
+        pattern = r'\b\w+\s\d+,\s\w+\b'
         error_message = "Felaktigt adressformat"
     else:
         return True  # Return True if correct format
@@ -144,11 +144,23 @@ def person_exists(person_list, query, search_by):
         messagebox.showerror("Error", f"Textrutan är tom, du måste ange något.")
         return False
     
-    if search_by == "name":
+    if search_by == "full_name":
         # Check if a person with the given full name exists in the list
         for person in person_list:
             person_full_name = f"{person.first_name} {person.last_name}".lower()
             if person_full_name == query:
+                return True
+    elif search_by == "first_name":
+        # Check if a person with the given first name exists in the list
+        for person in person_list:
+            person_first_name = person.first_name.lower()
+            if person_first_name == query:
+                return True
+    elif search_by == "last_name":
+        # Check if a person with the given last name exists in the list
+        for person in person_list:
+            person_last_name = person.last_name.lower()
+            if person_last_name == query:
                 return True
     elif search_by == "phone":
         # Check if a person with the given phone number exists in the list

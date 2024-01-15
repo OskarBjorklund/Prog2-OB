@@ -1,1 +1,1 @@
-badminton.txt;tennis.txt;fotboll.txt;
+tennis.txt;fotboll.txt;kth.txt;
