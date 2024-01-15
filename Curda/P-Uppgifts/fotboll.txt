@@ -1,0 +1,11 @@
+Eriksson;Anna;071-3141516;anna.eriksson@gmail.com;Ekvägen 14, Örebro
+Dahl;Johan;072-1011121;johan.dahl@hotmail.com;Björkvägen 8, Uppsala
+Carlsson;Maria;073-7778899;maria.carlsson@icloud.com;Lergatan 12, Malmö
+Björk;Oskar;071-3123123;oskarbjörk@kth.se;Täby
+Garcia;Katelyn;070-9769517;katelyn.garcia@gmail.com;651 Andrews Freeway, West Kyleville
+Burgess;Daniel;074-6049873;daniel.burgess@gmail.com;5802 Wilkins Hill, Lawsonview
+Mcdonald;Larry;079-3698563;larry.mcdonald@gmail.com;9536 Webster Stream Suite 371, Josephchester
+Parker;Breanna;079-4179151;breanna.parker@gmail.com;096 Maria Pines, Port Kimberly
+Lee;Susan;077-4045621;susan.lee@hotmail.com;68093 Johnson Road, Port Samanthaland
+Palmer;Kristen;070-4375064;kristen.palmer@hotmail.com;222 Wilson Crossroad Suite 887, Virginiaport
+Mays;Laura;079-1551067;laura.mays@gmail.com;879 Petersen Station, Peterport
